@@ -21,25 +21,44 @@ bun run build      # type-check + emit dist/server + dist/client
 
 ## Deploy to Cloudflare
 
+### Option A — from your machine (simplest)
+
 1. (Optional but recommended) rename the Worker in `app/wrangler.jsonc`:
 
    ```jsonc
    "name": "life-clock-prod"
    ```
 
-2. Deploy with Wrangler:
+2. Build + deploy:
 
    ```bash
    cd app
-   npx wrangler deploy
+   bun install        # or: npm install
+   bun run deploy     # type-check + build + npx wrangler deploy
    ```
 
-   The config already wires the SSR Worker (`main: dist/server/server.js`)
-   and serves static assets from `dist/client` (`assets.directory`).
-   `nodejs_compat` is enabled.
+   The `deploy` script runs the build first, so `dist/server/server.js`
+   always exists before `wrangler deploy` reads it. The config already wires
+   the SSR Worker (`main: dist/server/server.js`) and serves static assets
+   from `dist/client` (`assets.directory`). `nodejs_compat` is enabled.
 
 3. Production domain: add a custom domain to the Worker in the Cloudflare
    dashboard (e.g. `clock.example.com`). That is it.
+
+### Option B — Cloudflare Builds (git-connected CI)
+
+If you connected your repository to Cloudflare's automated builds, the
+pipeline runs **install → build → deploy** in that order. Two settings are
+required so the deploy step does not run before the build:
+
+- **Root directory**: `app`
+- **Build command**: `bun run build` (or `npm run build`)
+- **Deploy command**: `npx wrangler deploy`
+
+The build emits `dist/server/server.js` + `dist/client`; the deploy command
+then uploads the Worker and its assets. Without the build command, Wrangler
+fails with `The entry-point file at "dist/server/server.js" was not found`
+(because nothing generated it yet).
 
 ## Local preview
 
