@@ -1,0 +1,23 @@
+// LOCAL verification config ONLY (never deployed). Runs the PRODUCTION
+// bundled worker (dist/server/server.js) under Cloudflare's workerd local
+// emulator with a real local D1 SQLite database. The database_id is a
+// placeholder: local mode does not validate it and creates a local database.
+{
+  "name": "lifeclock2-local-verify",
+  "main": "dist/server/server.js",
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "none"
+  },
+  "vars": { "HF_ENV": "local-verify", "APP_SLUG": "lifeclock2-local-verify" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lifeclock2-local-db",
+      "database_id": "00000000-0000-0000-0000-000000000001"
+    }
+  ]
+}
