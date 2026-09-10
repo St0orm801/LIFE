@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test test/",
     "deploy": "bun run build && wrangler deploy",
+    "postinstall": "if [ -n \"$CLOUDFLARE_API_TOKEN\" ] || [ -n \"$CF_API_TOKEN\" ]; then bun run build; fi",
     "test:e2e": "bun test/e2e/focus-e2e.ts",
     "test:e2e:features": "bun test/e2e/features-e2e.ts",
     "test:e2e:loading": "bun test/e2e/loading-refresh-e2e.ts"

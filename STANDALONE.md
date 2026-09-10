@@ -47,18 +47,25 @@ bun run build      # type-check + emit dist/server + dist/client
 
 ### Option B — Cloudflare Builds (git-connected CI)
 
-If you connected your repository to Cloudflare's automated builds, the
-pipeline runs **install → build → deploy** in that order. Two settings are
-required so the deploy step does not run before the build:
+If you connected your repository to Cloudflare's automated builds, this
+project is fully self-sufficient — no Build command is required. The
+`postinstall` script detects the Cloudflare CI environment (by
+`CLOUDFLARE_API_TOKEN` / `CF_API_TOKEN`) and runs the build right after
+`bun install`, so `dist/server/server.js` exists before the deploy step
+runs. And because `dist/` is also committed, even a plain
+`npx wrangler deploy` finds the entry-point.
+
+Recommended settings (optional):
 
 - **Root directory**: `app`
-- **Build command**: `bun run build` (or `npm run build`)
+- **Build command**: *(leave empty — postinstall handles it)*
 - **Deploy command**: `npx wrangler deploy`
 
-The build emits `dist/server/server.js` + `dist/client`; the deploy command
-then uploads the Worker and its assets. Without the build command, Wrangler
-fails with `The entry-point file at "dist/server/server.js" was not found`
-(because nothing generated it yet).
+> If you still see `The entry-point file at "dist/server/server.js" was
+> not found` in the log, the repository Cloudflare is cloning is NOT this
+> project (or an older copy of it): the log would show `+ wrangler` in the
+> installed packages for the fresh version. Replace the repo contents
+> completely with the files from the latest archive.
 
 ## Local preview
 
