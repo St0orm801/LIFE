@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f7f5f0"/>
+  <!-- soft paper texture bands -->
+  <rect x="0" y="0" width="1200" height="8" fill="#e5e1d6"/>
+  <rect x="0" y="622" width="1200" height="8" fill="#e5e1d6"/>
+  <!-- clock mark -->
+  <g transform="translate(900 315)">
+    <circle cx="0" cy="0" r="170" fill="#ffffff" stroke="#e5e1d6" stroke-width="3"/>
+    <g stroke="#26241f" stroke-width="16" stroke-linecap="round">
+      <line x1="0" y1="-142" x2="0" y2="-112"/>
+      <line x1="0" y1="112" x2="0" y2="142"/>
+      <line x1="-142" y1="0" x2="-112" y2="0"/>
+      <line x1="112" y1="0" x2="142" y2="0"/>
+    </g>
+    <g stroke="#26241f" stroke-linecap="round">
+      <line x1="0" y1="0" x2="0" y2="-84" stroke-width="18"/>
+      <line x1="0" y1="0" x2="70" y2="42" stroke-width="14"/>
+    </g>
+    <circle cx="0" cy="0" r="18" fill="#b4473a"/>
+    <circle cx="84" cy="96" r="38" fill="none" stroke="#a8864e" stroke-width="12"/>
+    <path d="M84 80 v16 l12 7" fill="none" stroke="#a8864e" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- type -->
+  <text x="96" y="236" font-family="Liberation Sans, sans-serif" font-size="52" font-weight="bold" letter-spacing="6" fill="#2f7e78">LIFE CLOCK</text>
+  <text x="96" y="320" font-family="Liberation Sans, sans-serif" font-size="40" font-weight="bold" fill="#26241f">Everything important</text>
+  <text x="96" y="378" font-family="Liberation Sans, sans-serif" font-size="40" font-weight="bold" fill="#26241f">has a next date.</text>
+  <text x="96" y="446" font-family="Liberation Sans, sans-serif" font-size="24" fill="#57544a">Expirations, renewals, maintenance, warranties — remembered.</text>
+  <!-- CTA pill -->
+  <rect x="96" y="490" width="268" height="64" rx="32" fill="#2f7e78"/>
+  <text x="230" y="531" font-family="Liberation Sans, sans-serif" font-size="26" font-weight="bold" fill="#ffffff" text-anchor="middle">Start tracking</text>
+</svg>

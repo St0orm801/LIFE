@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f7e78"/>
+      <stop offset="1" stop-color="#265f5b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- clock face -->
+  <circle cx="256" cy="256" r="150" fill="#f7f5f0"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#ffffff" stroke-width="10" opacity="0.55"/>
+  <!-- hour ticks -->
+  <g stroke="#26241f" stroke-width="14" stroke-linecap="round">
+    <line x1="256" y1="128" x2="256" y2="156"/>
+    <line x1="256" y1="356" x2="256" y2="384"/>
+    <line x1="128" y1="256" x2="156" y2="256"/>
+    <line x1="356" y1="256" x2="384" y2="256"/>
+  </g>
+  <!-- hands pointing at a highlighted date ring -->
+  <g stroke="#26241f" stroke-linecap="round">
+    <line x1="256" y1="256" x2="256" y2="188" stroke-width="16"/>
+    <line x1="256" y1="256" x2="318" y2="292" stroke-width="12"/>
+  </g>
+  <circle cx="256" cy="256" r="16" fill="#b4473a"/>
+  <!-- center dot -->
+  <!-- highlighted ring on the right (the important date) -->
+  <circle cx="330" cy="336" r="34" fill="none" stroke="#a8864e" stroke-width="10"/>
+  <path d="M330 322 v14 l10 6" fill="none" stroke="#a8864e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

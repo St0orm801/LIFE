@@ -8,8 +8,11 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
-dist-ssr
+# dist is committed on purpose so `wrangler deploy` in Cloudflare Builds
+# (which has no separate build step in this project's config) finds the
+# entry-point immediately. Rebuild with `bun run build` after code changes.
+# dist
+# dist-ssr
 .output
 .vinxi
 .tanstack/**
