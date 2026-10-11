@@ -1,5 +1,5 @@
-import { K as reactExports, P as jsxRuntimeExports } from "./server-BYXv4CDl.js";
-import { p, n as nextMonthDay, a as addDays, t as todayStr, b as addYears, c as addMonths, d as diffDays, f as formatOffsetDays, m as monthDayOf, e as p$1, g as formatDateLong, h as formatRemainingDays, s as s$7, i as toDateStr, r as reminderOccurrence } from "./router-D9emHzeH.js";
+import { K as reactExports, P as jsxRuntimeExports, a0 as requireReactDom } from "./server-Dl6Vov1L.js";
+import { p, n as nextMonthDay, a as addDays, t as todayStr, b as addYears, c as addMonths, d as diffDays, f as formatOffsetDays, m as monthDayOf, e as p$1, g as formatDateLong, h as formatRemainingDays, s as s$7, i as toDateStr, r as reminderOccurrence } from "./router-D0iB5776.js";
 const e$n = /* @__PURE__ */ new Map([
   [
     "bold",
@@ -1812,6 +1812,7 @@ function AppProvider({ children, repo = repository }) {
   const [history, setHistory] = reactExports.useState([]);
   const [blobs, setBlobs] = reactExports.useState(/* @__PURE__ */ new Map());
   const [ready, setReady] = reactExports.useState(false);
+  const [loadFailed, setLoadFailed] = reactExports.useState(false);
   reactExports.useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -1844,11 +1845,11 @@ function AppProvider({ children, repo = repository }) {
           await repoRef.current.putItems(rolled);
         }
         setItems(rolled);
-        setReady(true);
+        if (!cancelled) setReady(true);
         void seeded;
       } catch (err) {
         console.error("failed to load lifec lock data", err);
-        setReady(true);
+        if (!cancelled) setLoadFailed(true);
       }
     })();
     return () => {
@@ -2101,6 +2102,7 @@ function AppProvider({ children, repo = repository }) {
       wipeAll
     ]
   );
+  if (loadFailed) throw new Error("Saved records could not be loaded");
   return /* @__PURE__ */ jsxRuntimeExports.jsx(Ctx.Provider, { value, children });
 }
 const SYNONYMS = {
@@ -2251,6 +2253,10 @@ function actionVerbLabel(actionType) {
       return "Next date";
   }
 }
+function needsAttention(item, today = todayStr()) {
+  const s2 = deriveStatus(item, today);
+  return s2 === "overdue" || s2 === "expired" || s2 === "today" || s2 === "due-soon";
+}
 function overdueFirst(a2, b) {
   const sa = deriveStatus(a2);
   const sb = deriveStatus(b);
@@ -2295,7 +2301,7 @@ function EmptyState({
   hint,
   action
 }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center justify-center px-6 py-14 text-center", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center justify-center px-5 py-8 text-center", children: [
     icon ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-3 text-ink-3", children: icon }) : null,
     /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.99rem] font-bold text-ink", children: title }),
     hint ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 max-w-xs text-[0.85rem] text-ink-3", children: hint }) : null,
@@ -2482,7 +2488,7 @@ function AddFlow({ onClose }) {
           "button",
           {
             className: "flex h-10 w-10 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-surface-2",
-            "aria-label": "Close",
+            "aria-label": step === "home" ? "Close add item" : "Back",
             onClick: () => step === "home" ? onClose() : step === "category" || step === "purchase" ? setStep("home") : setStep("category"),
             children: step === "home" ? /* @__PURE__ */ jsxRuntimeExports.jsx(n, { size: 22 }) : /* @__PURE__ */ jsxRuntimeExports.jsx(s$5, { size: 22 })
           }
@@ -2499,13 +2505,12 @@ function AddFlow({ onClose }) {
             placeholder: "Search, e.g. passport, licence, filter, insurance",
             value: query,
             onChange: (e2) => setQuery(e2.target.value),
-            "aria-label": "Search preset library",
-            autoFocus: true
+            "aria-label": "Search preset library"
           }
         )
       ] }) }) : null
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-10 pt-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))] pt-4", children: [
       step === "home" && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "card mb-4 w-full p-4 text-left", onClick: () => setStep("purchase"), children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-extrabold", children: "Track a purchase →" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mt-1 block text-sm text-ink-2", children: "Return deadline, receipt, warranty and refund follow-up." })
@@ -2925,6 +2930,7 @@ function FoodEntry({
 function clamp(n2, min, max) {
   return Math.min(max, Math.max(min, n2));
 }
+var reactDomExports = requireReactDom();
 function parseHash(hash) {
   const h = hash.replace(/^#\/?/, "");
   const [head, ...rest] = h.split("/");
@@ -3037,8 +3043,8 @@ function AppShell({
       ] }) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex min-h-dvh min-w-0 flex-1 flex-col", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "mx-auto w-full max-w-2xl flex-1 px-4 pb-28 pt-5 md:px-8 md:pb-12 md:pt-7", children: content }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
+      /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "app-main mx-auto w-full max-w-2xl flex-1 px-4 pb-28 pt-5 md:px-8 md:pb-12 md:pt-7", children: content }),
+      typeof document !== "undefined" && reactDomExports.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(
         "nav",
         {
           "aria-label": "Main",
@@ -3057,10 +3063,10 @@ function AppShell({
               },
               n2.key
             )),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "nav-add", role: "button", tabIndex: 0, onClick: () => navigate({ view: "add" }), onKeyDown: (e2) => e2.key === "Enter" && navigate({ view: "add" }), "aria-label": "Add item", children: /* @__PURE__ */ jsxRuntimeExports.jsx(n$3, { size: 26, weight: "bold" }) })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: "nav-add", onClick: () => navigate({ view: "add" }), "aria-label": "Add item", children: /* @__PURE__ */ jsxRuntimeExports.jsx(n$3, { size: 26, weight: "bold" }) })
           ] })
         }
-      )
+      ), document.body)
     ] }),
     isAdd ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 md:pl-60 lg:pl-64", children: /* @__PURE__ */ jsxRuntimeExports.jsx(AddFlow, { onClose: () => navigate({ view: "today" }) }) }) : null
   ] });
@@ -3134,13 +3140,13 @@ function TodayView({ navigate }) {
     [items, today]
   );
   const next30 = reactExports.useMemo(
-    () => items.filter((i) => i.status === "active" && diffDays(today, i.nextDate) >= 8 && diffDays(today, i.nextDate) <= 30).length,
+    () => items.filter((i) => i.status === "active" && diffDays(today, i.nextDate) >= 0 && diffDays(today, i.nextDate) <= 30).length,
     [items, today]
   );
   const nothingNeeded = overdue.length === 0 && todayList.length === 0 && comingSoon.length === 0;
   const openItem = (id) => navigate({ view: "item", id });
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "anim-fade-up", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "mb-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "mb-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.8rem] font-bold uppercase tracking-[0.16em] text-ink-3", children: greeting() }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-1 text-[1.7rem] font-extrabold tracking-tight text-ink", children: formatDateLong(today) })
     ] }),
@@ -3171,19 +3177,19 @@ function TodayView({ navigate }) {
       /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: "Needs attention", subtle: true }),
       overdue.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsx(ItemRow, { item, onClick: () => openItem(item.id) }, item.id)),
       todayList.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsx(ItemRow, { item, onClick: () => openItem(item.id) }, item.id)),
-      comingSoon.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsx(ItemRow, { item, onClick: () => openItem(item.id) }, item.id)),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 grid grid-cols-2 gap-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(OverviewTile, { icon: /* @__PURE__ */ jsxRuntimeExports.jsx(n$6, { size: 18, weight: "duotone" }), label: "This week", value: thisWeek }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(OverviewTile, { icon: /* @__PURE__ */ jsxRuntimeExports.jsx(n$5, { size: 18, weight: "duotone" }), label: "Next 30 days", value: next30 })
-      ] })
+      comingSoon.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsx(ItemRow, { item, onClick: () => openItem(item.id) }, item.id))
+    ] }),
+    ready && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 grid grid-cols-2 gap-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(OverviewTile, { icon: /* @__PURE__ */ jsxRuntimeExports.jsx(n$6, { size: 18, weight: "duotone" }), label: "Next 7 days", value: thisWeek, onClick: () => navigate({ view: "timeline" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(OverviewTile, { icon: /* @__PURE__ */ jsxRuntimeExports.jsx(n$5, { size: 18, weight: "duotone" }), label: "Next 30 days", value: next30, onClick: () => navigate({ view: "timeline" }) })
     ] })
   ] });
 }
 function Section({ title, subtle }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: `mb-3 text-[0.82rem] font-bold uppercase tracking-[0.14em] ${subtle ? "text-ink-3" : "text-ink-2"}`, children: title });
 }
-function OverviewTile({ icon, label, value }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "card flex items-center gap-3 px-4 py-3.5", children: [
+function OverviewTile({ icon, label, value, onClick }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "card flex items-center gap-3 px-4 py-3.5 text-left", onClick, "aria-label": `${value} items in ${label}. Open timeline`, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-teal", children: icon }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "tnum text-[1.15rem] font-extrabold leading-none text-ink", children: value }),
@@ -3421,7 +3427,8 @@ function ItemsView({ navigate }) {
   const { items, ready } = useApp();
   const [query, setQuery] = reactExports.useState("");
   const [tab, setTab] = reactExports.useState("active");
-  const [categoryFilter, setCategoryFilter] = reactExports.useState(null);
+  const [quick, setQuick] = reactExports.useState("all");
+  const [categoryFilter, setCategoryFilter] = reactExports.useState("__all__");
   const counts = reactExports.useMemo(() => {
     const m2 = /* @__PURE__ */ new Map();
     for (const it of items) {
@@ -3435,9 +3442,14 @@ function ItemsView({ navigate }) {
     if (categoryFilter && categoryFilter !== "__all__") {
       list = list.filter((i) => i.categoryId === categoryFilter);
     }
+    if (quick === "attention") list = list.filter((i) => needsAttention(i));
+    if (quick === "30") list = list.filter((i) => {
+      const d = diffDays(todayStr(), i.nextDate);
+      return d >= 0 && d <= 30;
+    });
     if (query.trim()) list = searchItems(list, query, PRESET_BY_ID);
     return [...list].sort((a2, b) => a2.nextDate < b.nextDate ? -1 : 1);
-  }, [items, tab, categoryFilter, query]);
+  }, [items, tab, categoryFilter, query, quick]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "anim-fade-up", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("header", { className: "mb-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-[1.7rem] font-extrabold tracking-tight text-ink", children: "Items" }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative mb-4", children: [
@@ -3461,19 +3473,33 @@ function ItemsView({ navigate }) {
         className: `chip capitalize ${tab === t2 ? "chip-active" : ""}`,
         onClick: () => {
           setTab(t2);
-          setCategoryFilter(null);
+          setCategoryFilter("__all__");
+          setQuick("all");
         },
         children: t2
       },
       t2
     )) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-4 flex gap-2 overflow-x-auto pb-1", "aria-label": "Quick filters", children: [
+      [{ id: "all", name: "All items" }, { id: "attention", name: "Needs attention" }, { id: "30", name: "Next 30 days" }, { id: "documents", name: "Documents" }, { id: "food", name: "Food" }, { id: "home", name: "Home" }, { id: "vehicle", name: "Vehicles" }].map((f2) => /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "chip", "aria-pressed": quick === f2.id, onClick: () => {
+        setQuick(f2.id);
+        setCategoryFilter(["all", "attention", "30"].includes(f2.id) ? "__all__" : f2.id);
+      }, children: f2.name }, f2.id)),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "chip", "aria-pressed": categoryFilter === null, onClick: () => {
+        setQuick("categories");
+        setCategoryFilter(null);
+      }, children: "Categories" })
+    ] }),
     !ready ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "py-10 text-center text-sm text-ink-3", children: "Loading…" }) : tab === "active" && !query && !categoryFilter ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 gap-3 sm:grid-cols-3", children: CATEGORIES.map((c2) => {
         const n2 = counts.get(c2.id) ?? 0;
         return /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
           {
-            onClick: () => setCategoryFilter(c2.id),
+            onClick: () => {
+              setCategoryFilter(c2.id);
+              setQuick(c2.id);
+            },
             className: "card flex flex-col items-start gap-2.5 p-4 text-left transition-transform active:scale-[0.98]",
             children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -3516,7 +3542,7 @@ function ItemsView({ navigate }) {
         }
       ) }) : null
     ] }) : null,
-    tab !== "active" || query || categoryFilter ? visible.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "card", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ready && (tab !== "active" || query || categoryFilter) ? visible.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "card", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
       EmptyState,
       {
         title: "Nothing here",
@@ -3525,7 +3551,10 @@ function ItemsView({ navigate }) {
     ) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       categoryFilter && categoryFilter !== "__all__" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-3 flex items-center justify-between", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-[0.95rem] font-extrabold text-ink", children: CATEGORY_BY_ID[categoryFilter]?.name }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-ghost btn-sm", onClick: () => setCategoryFilter(null), children: "Clear" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-ghost btn-sm", onClick: () => {
+          setCategoryFilter("__all__");
+          setQuick("all");
+        }, children: "Clear" })
       ] }) : null,
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "card-flat divide-y divide-line px-1.5 py-1", children: visible.map((it) => /* @__PURE__ */ jsxRuntimeExports.jsx(ItemRow, { item: it, onClick: () => navigate({ view: "item", id: it.id }) }, it.id)) })
     ] }) : null
@@ -3563,9 +3592,11 @@ function ItemDetailView({
     if (!item) return;
     setNoteDraft(item.notes ?? "");
     void historyFor(item.id).then((h) => setHistory([...h].sort((a2, b) => b.date - a2.date)));
+    setAttachments(/* @__PURE__ */ new Map());
+    let active = true;
     item.attachments.forEach((a2) => {
       void loadBlob(a2.id).then((b) => {
-        if (b) {
+        if (b && active) {
           setAttachments((prev) => {
             const next = new Map(prev);
             next.set(a2.id, b);
@@ -3574,7 +3605,14 @@ function ItemDetailView({
         }
       });
     });
-  }, [item?.id]);
+    return () => {
+      active = false;
+    };
+  }, [item?.id, item?.updatedAt]);
+  const attachmentUrls = reactExports.useMemo(() => new Map([...attachments].map(([key, blob]) => [key, URL.createObjectURL(blob)])), [attachments]);
+  reactExports.useEffect(() => () => {
+    attachmentUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [attachmentUrls]);
   const status = item ? deriveStatus(item, today) : "archived";
   const statusLabel = item ? statusMeta(status).label : "";
   const onLifecycle = reactExports.useCallback(async () => {
@@ -3746,8 +3784,8 @@ function ItemDetailView({
         ] })
       ] }),
       item.attachments.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.85rem] text-ink-3", children: "No photos or files yet. Receipts, warranty cards, passports — keep them here." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "grid grid-cols-3 gap-2.5 sm:grid-cols-4", children: item.attachments.map((a2) => {
-        const blob = attachments.get(a2.id);
-        const url = blob ? URL.createObjectURL(blob) : null;
+        attachments.get(a2.id);
+        const url = attachmentUrls.get(a2.id) ?? null;
         return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "group relative", children: [
           a2.kind === "photo" && url ? /* @__PURE__ */ jsxRuntimeExports.jsx(
             "img",
@@ -3781,7 +3819,7 @@ function ItemDetailView({
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             "button",
             {
-              className: "absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-ink/70 text-white opacity-0 transition-opacity group-hover:opacity-100",
+              className: "absolute right-1 top-1 flex h-9 w-9 items-center justify-center rounded-full bg-ink/70 text-white transition-opacity",
               "aria-label": `Remove ${a2.filename}`,
               onClick: () => void removeAttachment(item.id, a2.id),
               children: /* @__PURE__ */ jsxRuntimeExports.jsx(n$1, { size: 12 })
@@ -4444,11 +4482,11 @@ var Encoding;
   Encoding2["UTF16"] = "utf16";
 })(Encoding || (Encoding = {}));
 const Filesystem = registerPlugin("Filesystem", {
-  web: () => import("./web-CX2w7DUL.js").then((m2) => new m2.FilesystemWeb())
+  web: () => import("./web-DD1IhAI5.js").then((m2) => new m2.FilesystemWeb())
 });
 f();
 const Share = registerPlugin("Share", {
-  web: () => import("./web-CRK2yg5e.js").then((m2) => new m2.ShareWeb())
+  web: () => import("./web-Dwhpzpil.js").then((m2) => new m2.ShareWeb())
 });
 async function exportTextFile(filename, content, mime) {
   if (Capacitor.isNativePlatform()) {
@@ -4577,7 +4615,7 @@ var Weekday;
   Weekday2[Weekday2["Saturday"] = 7] = "Saturday";
 })(Weekday || (Weekday = {}));
 const LocalNotifications = registerPlugin("LocalNotifications", {
-  web: () => import("./web-Cw0bEdrU.js").then((m2) => new m2.LocalNotificationsWeb())
+  web: () => import("./web-CzhNUEjq.js").then((m2) => new m2.LocalNotificationsWeb())
 });
 function planDeviceReminders(items, now = /* @__PURE__ */ new Date(), time = "09:00") {
   const reminderTime2 = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : "09:00";
@@ -4693,6 +4731,8 @@ function MoreView({ navigate }) {
   const { items, exportAll, importAll, wipeAll } = useApp();
   const [notif, setNotif] = reactExports.useState(permissionState());
   const [confirmWipe, setConfirmWipe] = reactExports.useState(false);
+  const [pendingRestore, setPendingRestore] = reactExports.useState(null);
+  const [busy, setBusy] = reactExports.useState(false);
   const [msg, setMsg] = reactExports.useState(null);
   const fileRef = reactExports.useRef(null);
   const backup = async () => {
@@ -4705,12 +4745,16 @@ function MoreView({ navigate }) {
     }
   };
   const restore = async (file) => {
+    setBusy(true);
     try {
       const text = await file.text();
       await importAll(text);
       setMsg("Backup restored. All views updated.");
     } catch {
       setMsg("That file could not be read as a LIFE CLOCK backup.");
+    } finally {
+      setBusy(false);
+      setPendingRestore(null);
     }
   };
   const enableNotifs = async () => {
@@ -4736,7 +4780,7 @@ function MoreView({ navigate }) {
         /* @__PURE__ */ jsxRuntimeExports.jsx("a", { className: "underline text-teal-deep", href: "https://life.sevavtostrah.workers.dev/privacy.html", target: "_blank", rel: "noreferrer", children: "Privacy policy" })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(PhoneReminders, {}),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card p-5", children: [
+      !isNativeApp() && /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card p-5", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-start justify-between gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "flex items-center gap-2 text-[0.95rem] font-extrabold text-ink", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-teal", children: /* @__PURE__ */ jsxRuntimeExports.jsx(s$4, { size: 18 }) }),
@@ -4754,7 +4798,7 @@ function MoreView({ navigate }) {
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-teal", children: /* @__PURE__ */ jsxRuntimeExports.jsx(c$4, { size: 18 }) }),
           "Calendar export (.ics)"
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1.5 text-[0.83rem] leading-relaxed text-ink-2", children: "Download all active items and reminders as an .ics file, then import it into Google Calendar, Outlook, or Apple Calendar. Automatic two-way sync is planned with cloud accounts." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1.5 text-[0.83rem] leading-relaxed text-ink-2", children: "Download all active items and reminders as an .ics file, then import it into Google Calendar, Outlook, or Apple Calendar. This is a one-time export; later changes require another export." }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-secondary mt-3", onClick: () => {
           void downloadIcs(items).catch(() => setMsg("Calendar export did not complete. You can try again."));
         }, children: [
@@ -4767,7 +4811,7 @@ function MoreView({ navigate }) {
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-teal", children: /* @__PURE__ */ jsxRuntimeExports.jsx(c, { size: 18 }) }),
           "Your data"
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1.5 text-[0.83rem] leading-relaxed text-ink-2", children: "Everything is stored locally in this browser (IndexedDB). No account, no server, no tracking. Back up as JSON to move devices or restore." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1.5 text-[0.83rem] leading-relaxed text-ink-2", children: "Records and attachments are stored on this device. Save a JSON backup before changing devices or removing the app. Restoring replaces the records currently here." }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-3 flex flex-wrap gap-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-secondary btn-sm", onClick: backup, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(l$1, { size: 15 }),
@@ -4786,7 +4830,7 @@ function MoreView({ navigate }) {
               className: "hidden",
               onChange: (e2) => {
                 const f2 = e2.target.files?.[0];
-                if (f2) void restore(f2);
+                if (f2) setPendingRestore(f2);
                 e2.target.value = "";
               }
             }
@@ -4799,10 +4843,18 @@ function MoreView({ navigate }) {
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card p-5", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-[0.95rem] font-extrabold text-ink", children: "About LIFE CLOCK" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1.5 text-[0.83rem] leading-relaxed text-ink-2", children: "Everything important has a next date. Track expirations, renewals, maintenance, warranties, and the people you love in one simple place. Version 2.0 (local-first). Built as a standalone project; no account is ever required." })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1.5 text-[0.83rem] leading-relaxed text-ink-2", children: "Everything important has a next date. Track expirations, renewals, maintenance, warranties, and the people you love in one simple place. Version 1.0. Free to use, with no ads or subscription. No account required." })
       ] })
     ] }),
-    msg ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "anim-pop fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-ink px-5 py-2.5 text-[0.85rem] font-bold text-white shadow-pop", children: msg }) : null,
+    msg ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { role: "status", className: "anim-fade-in sticky bottom-24 z-50 mt-4 rounded-2xl bg-ink px-4 py-3 text-sm text-white shadow-pop", children: msg }) : null,
+    pendingRestore && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "card mt-4 p-5", role: "alert", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "font-extrabold", children: "Replace records with this backup?" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-sm text-ink-2", children: "Save a backup of your current records first. An invalid file will leave them untouched." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-3 flex gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-secondary", disabled: busy, onClick: () => setPendingRestore(null), children: "Cancel" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-primary", disabled: busy, onClick: () => void restore(pendingRestore), children: busy ? "Restoring…" : "Restore backup" })
+      ] })
+    ] }),
     confirmWipe ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 md:items-center", onClick: () => setConfirmWipe(false), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "sheet w-full max-w-sm p-6", onClick: (e2) => e2.stopPropagation(), children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-[1.05rem] font-extrabold text-ink", children: "Remove all data?" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-sm text-ink-2", children: "Every item, history entry and attachment in this browser is deleted. Make a backup first if you might need it." }),
@@ -4812,10 +4864,18 @@ function MoreView({ navigate }) {
           "button",
           {
             className: "btn btn-danger flex-1",
-            onClick: () => {
-              void wipeAll();
-              setConfirmWipe(false);
-              setMsg("All data removed.");
+            disabled: busy,
+            onClick: async () => {
+              setBusy(true);
+              try {
+                await wipeAll();
+                setConfirmWipe(false);
+                setMsg("All data removed.");
+              } catch {
+                setMsg("Could not remove data. Try again.");
+              } finally {
+                setBusy(false);
+              }
             },
             children: "Remove"
           }
@@ -4826,7 +4886,7 @@ function MoreView({ navigate }) {
   ] });
 }
 const App = registerPlugin("App", {
-  web: () => import("./web-fIe0oiJT.js").then((m2) => new m2.AppWeb())
+  web: () => import("./web-CiRwmVjX.js").then((m2) => new m2.AppWeb())
 });
 function DeviceEvents() {
   const { items, ready } = useApp();

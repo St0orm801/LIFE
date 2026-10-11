@@ -89,7 +89,7 @@ export function EmptyState({
   action?: JSX.Element;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center px-5 py-8 text-center">
       {icon ? <div className="mb-3 text-ink-3">{icon}</div> : null}
       <p className="text-[0.99rem] font-bold text-ink">{title}</p>
       {hint ? <p className="mt-1 max-w-xs text-[0.85rem] text-ink-3">{hint}</p> : null}

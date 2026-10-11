@@ -11,6 +11,7 @@ import {
   SlidersHorizontal,
 } from "@phosphor-icons/react";
 import { AddFlow } from "./add-flow";
+import { createPortal } from "react-dom";
 
 export type Route =
   | { view: "today" }
@@ -138,12 +139,12 @@ export function AppShell({
 
       {/* Main column */}
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
-        <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-28 pt-5 md:px-8 md:pb-12 md:pt-7">
+        <main className="app-main mx-auto w-full max-w-2xl flex-1 px-4 pb-28 pt-5 md:px-8 md:pb-12 md:pt-7">
           {content}
         </main>
 
         {/* Mobile bottom nav */}
-        <nav
+        {typeof document !== "undefined" && createPortal(<nav
           aria-label="Main"
           className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur safe-bottom md:hidden"
         >
@@ -159,11 +160,11 @@ export function AppShell({
                 {n.label}
               </button>
             ))}
-            <div className="nav-add" role="button" tabIndex={0} onClick={() => navigate({ view: "add" })} onKeyDown={(e) => e.key === "Enter" && navigate({ view: "add" })} aria-label="Add item">
+            <button type="button" className="nav-add" onClick={() => navigate({ view: "add" })} aria-label="Add item">
               <Plus size={26} weight="bold" />
-            </div>
+            </button>
           </div>
-        </nav>
+        </nav>, document.body)}
       </div>
 
       {/* Add flow overlays the app (modal) */}

@@ -111,6 +111,7 @@ export function AppProvider({ children, repo = repository }: { children: ReactNo
   const [history, setHistory] = useState<HistoryEvent[]>([]);
   const [blobs, setBlobs] = useState<Map<string, Blob>>(new Map());
   const [ready, setReady] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   // Initial load + demo seed on first run (synthetic data only, §49).
   useEffect(() => {
@@ -147,11 +148,11 @@ export function AppProvider({ children, repo = repository }: { children: ReactNo
           await repoRef.current.putItems(rolled);
         }
         setItems(rolled);
-        setReady(true);
+        if (!cancelled) setReady(true);
         void seeded;
       } catch (err) {
         console.error("failed to load lifec lock data", err);
-        setReady(true);
+        if (!cancelled) setLoadFailed(true);
       }
     })();
     return () => {
@@ -396,6 +397,7 @@ export function AppProvider({ children, repo = repository }: { children: ReactNo
      loadBlob, seedDemo, exportAll, importAll, wipeAll],
   );
 
+  if (loadFailed) throw new Error("Saved records could not be loaded");
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

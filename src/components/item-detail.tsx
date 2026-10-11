@@ -71,10 +71,11 @@ export function ItemDetailView({
     if (!item) return;
     setNoteDraft(item.notes ?? "");
     void historyFor(item.id).then((h) => setHistory([...h].sort((a, b) => b.date - a.date)));
-    const m = new Map<string, Blob>();
+    setAttachments(new Map());
+    let active = true;
     item.attachments.forEach((a) => {
       void loadBlob(a.id).then((b) => {
-        if (b) {
+        if (b && active) {
           setAttachments((prev) => {
             const next = new Map(prev);
             next.set(a.id, b);
@@ -83,8 +84,11 @@ export function ItemDetailView({
         }
       });
     });
-    void m;
-  }, [item?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => { active = false; };
+  }, [item?.id, item?.updatedAt]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const attachmentUrls = useMemo(() => new Map([...attachments].map(([key, blob]) => [key, URL.createObjectURL(blob)])), [attachments]);
+  useEffect(() => () => { attachmentUrls.forEach(url => URL.revokeObjectURL(url)); }, [attachmentUrls]);
 
   const status = item ? deriveStatus(item, today) : "archived";
   const statusLabel = item ? statusMeta(status).label : "";
@@ -299,7 +303,7 @@ export function ItemDetailView({
           <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
             {item.attachments.map((a) => {
               const blob = attachments.get(a.id);
-              const url = blob ? URL.createObjectURL(blob) : null;
+              const url = attachmentUrls.get(a.id) ?? null;
               return (
                 <li key={a.id} className="group relative">
                   {a.kind === "photo" && url ? (
@@ -330,7 +334,7 @@ export function ItemDetailView({
                     />
                   ) : null}
                   <button
-                    className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-ink/70 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                    className="absolute right-1 top-1 flex h-9 w-9 items-center justify-center rounded-full bg-ink/70 text-white transition-opacity"
                     aria-label={`Remove ${a.filename}`}
                     onClick={() => void removeAttachment(item.id, a.id)}
                   >

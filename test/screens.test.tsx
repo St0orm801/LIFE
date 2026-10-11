@@ -65,10 +65,12 @@ describe("screen render (client, real store)", () => {
     expect(html).toContain("Due soon");
   });
 
-  it("Items shows category cards with counts", async () => {
+  it("Items opens a list immediately and offers category filters", async () => {
     const html = await mountHtml(createElement(ItemsView, { navigate: noopNav as never }));
     expect(html).toContain("Documents");
     expect(html).toContain("All items");
+    expect(html).toContain("Passport");
+    expect(html).toContain("Needs attention");
   });
 
   it("More shows settings sections", async () => {
@@ -101,6 +103,21 @@ describe("screen render (client, real store)", () => {
     );
     expect(html).toContain("Calendar");
     expect(html).toContain("Mon");
+  });
+});
+
+describe("release screen behavior", () => {
+  it("Next 30 days includes the next seven days", async () => {
+    const html = await mountHtml(createElement(TodayView, { navigate: noopNav as never }));
+    expect(html).toContain('aria-label="2 items in Next 30 days. Open timeline"');
+  });
+  it("a clear clock still offers useful upcoming metrics", async () => {
+    await repository.wipe();
+    await repository.setMeta("demo-seeded-v1", "yes");
+    const html = await mountHtml(createElement(TodayView, { navigate: noopNav as never }));
+    expect(html).toContain("Add the first thing");
+    expect(html).toContain("Next 30 days");
+    expect(html).toContain("Next 7 days");
   });
 });
 

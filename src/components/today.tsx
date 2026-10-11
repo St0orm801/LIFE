@@ -42,7 +42,7 @@ export function TodayView({ navigate }: { navigate: (r: Route) => void }) {
     [items, today],
   );
   const next30 = useMemo(
-    () => items.filter((i) => i.status === "active" && diffDays(today, i.nextDate) >= 8 && diffDays(today, i.nextDate) <= 30).length,
+    () => items.filter((i) => i.status === "active" && diffDays(today, i.nextDate) >= 0 && diffDays(today, i.nextDate) <= 30).length,
     [items, today],
   );
 
@@ -52,7 +52,7 @@ export function TodayView({ navigate }: { navigate: (r: Route) => void }) {
 
   return (
     <div className="anim-fade-up">
-      <header className="mb-6">
+      <header className="mb-4">
         <p className="text-[0.8rem] font-bold uppercase tracking-[0.16em] text-ink-3">{greeting()}</p>
         <h1 className="mt-1 text-[1.7rem] font-extrabold tracking-tight text-ink">
           {formatDateLong(today)}
@@ -91,12 +91,12 @@ export function TodayView({ navigate }: { navigate: (r: Route) => void }) {
             <ItemRow key={item.id} item={item} onClick={() => openItem(item.id)} />
           ))}
 
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <OverviewTile icon={<Clock size={18} weight="duotone" />} label="This week" value={thisWeek} />
-            <OverviewTile icon={<Hourglass size={18} weight="duotone" />} label="Next 30 days" value={next30} />
-          </div>
         </>
       )}
+      {ready && <div className="mt-4 grid grid-cols-2 gap-3">
+        <OverviewTile icon={<Clock size={18} weight="duotone" />} label="Next 7 days" value={thisWeek} onClick={() => navigate({ view: "timeline" })} />
+        <OverviewTile icon={<Hourglass size={18} weight="duotone" />} label="Next 30 days" value={next30} onClick={() => navigate({ view: "timeline" })} />
+      </div>}
     </div>
   );
 }
@@ -109,15 +109,15 @@ function Section({ title, subtle }: { title: string; subtle?: boolean }) {
   );
 }
 
-function OverviewTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function OverviewTile({ icon, label, value, onClick }: { icon: React.ReactNode; label: string; value: number; onClick: () => void }) {
   return (
-    <div className="card flex items-center gap-3 px-4 py-3.5">
+    <button className="card flex items-center gap-3 px-4 py-3.5 text-left" onClick={onClick} aria-label={`${value} items in ${label}. Open timeline`}>
       <div className="text-teal">{icon}</div>
       <div className="min-w-0">
         <div className="tnum text-[1.15rem] font-extrabold leading-none text-ink">{value}</div>
         <div className="mt-0.5 text-[0.75rem] font-semibold text-ink-3">{label}</div>
       </div>
-    </div>
+    </button>
   );
 }
 

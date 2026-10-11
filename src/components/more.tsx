@@ -28,6 +28,8 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
   const { items, exportAll, importAll, wipeAll } = useApp();
   const [notif, setNotif] = useState(permissionState());
   const [confirmWipe, setConfirmWipe] = useState(false);
+  const [pendingRestore, setPendingRestore] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -42,13 +44,14 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
   };
 
   const restore = async (file: File) => {
+    setBusy(true);
     try {
       const text = await file.text();
       await importAll(text);
       setMsg("Backup restored. All views updated.");
     } catch {
       setMsg("That file could not be read as a LIFE CLOCK backup.");
-    }
+    } finally { setBusy(false); setPendingRestore(null); }
   };
 
   const enableNotifs = async () => {
@@ -78,7 +81,7 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
         <section className="card p-5 flex flex-wrap gap-4 text-sm"><a className="underline text-teal-deep" href="https://life.sevavtostrah.workers.dev/support.html" target="_blank" rel="noreferrer">Help & support</a><a className="underline text-teal-deep" href="https://life.sevavtostrah.workers.dev/privacy.html" target="_blank" rel="noreferrer">Privacy policy</a></section>
         <PhoneReminders />
         {/* Notifications */}
-        <section className="card p-5">
+        {!isNativeApp() && <section className="card p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="flex items-center gap-2 text-[0.95rem] font-extrabold text-ink">
@@ -105,7 +108,7 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
               </button>
             )}
           </div>
-        </section>
+        </section>}
 
         {/* Calendar export */}
         <section className="card p-5">
@@ -117,8 +120,8 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
           </h2>
           <p className="mt-1.5 text-[0.83rem] leading-relaxed text-ink-2">
             Download all active items and reminders as an .ics file, then import
-            it into Google Calendar, Outlook, or Apple Calendar. Automatic
-            two-way sync is planned with cloud accounts.
+            it into Google Calendar, Outlook, or Apple Calendar. This is a
+            one-time export; later changes require another export.
           </p>
           <button className="btn btn-secondary mt-3" onClick={() => { void downloadIcs(items).catch(() => setMsg("Calendar export did not complete. You can try again.")); }}>
             <DownloadSimple size={16} />
@@ -135,8 +138,8 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
             Your data
           </h2>
           <p className="mt-1.5 text-[0.83rem] leading-relaxed text-ink-2">
-            Everything is stored locally in this browser (IndexedDB). No account,
-            no server, no tracking. Back up as JSON to move devices or restore.
+            Records and attachments are stored on this device. Save a JSON backup
+            before changing devices or removing the app. Restoring replaces the records currently here.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button className="btn btn-secondary btn-sm" onClick={backup}>
@@ -154,7 +157,7 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) void restore(f);
+                if (f) setPendingRestore(f);
                 e.target.value = "";
               }}
             />
@@ -173,18 +176,18 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
           <p className="mt-1.5 text-[0.83rem] leading-relaxed text-ink-2">
             Everything important has a next date. Track expirations, renewals,
             maintenance, warranties, and the people you love in one simple place.
-            Version 2.0 (local-first). Built as a standalone project; no account
-            is ever required.
+            Version 1.0. Free to use, with no ads or subscription. No account required.
           </p>
         </section>
       </div>
 
       {msg ? (
-        <div className="anim-pop fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-ink px-5 py-2.5 text-[0.85rem] font-bold text-white shadow-pop">
+        <div role="status" className="anim-fade-in sticky bottom-24 z-50 mt-4 rounded-2xl bg-ink px-4 py-3 text-sm text-white shadow-pop">
           {msg}
         </div>
       ) : null}
 
+      {pendingRestore && <div className="card mt-4 p-5" role="alert"><h2 className="font-extrabold">Replace records with this backup?</h2><p className="mt-2 text-sm text-ink-2">Save a backup of your current records first. An invalid file will leave them untouched.</p><div className="mt-3 flex gap-2"><button className="btn btn-secondary" disabled={busy} onClick={() => setPendingRestore(null)}>Cancel</button><button className="btn btn-primary" disabled={busy} onClick={() => void restore(pendingRestore)}>{busy ? "Restoring…" : "Restore backup"}</button></div></div>}
       {confirmWipe ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 md:items-center" onClick={() => setConfirmWipe(false)}>
           <div className="sheet w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
@@ -198,10 +201,12 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
               </button>
               <button
                 className="btn btn-danger flex-1"
-                onClick={() => {
-                  void wipeAll();
-                  setConfirmWipe(false);
-                  setMsg("All data removed.");
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  try { await wipeAll(); setConfirmWipe(false); setMsg("All data removed."); }
+                  catch { setMsg("Could not remove data. Try again."); }
+                  finally { setBusy(false); }
                 }}
               >
                 Remove

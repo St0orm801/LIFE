@@ -20,7 +20,7 @@
   --color-line-2: #d8d3c6;
   --color-ink: #26241f;
   --color-ink-2: #57544a;
-  --color-ink-3: #8d887b;
+  --color-ink-3: #706b60;
 
   /* Accent */
   --color-teal: #2f7e78;
@@ -312,6 +312,10 @@
 }
 
 /* Motion — fast, subtle, purposeful. Collapsed under reduced motion. */
+.app-main { padding-top: calc(1.25rem + env(safe-area-inset-top, 0px)); }
+.nav-item { min-width: 48px; }
+@media (min-width: 768px) { .app-main { padding-top: calc(1.75rem + env(safe-area-inset-top, 0px)); } }
+@media (max-width: 767px) { .btn { white-space: normal; } }
 @media (prefers-reduced-motion: no-preference) {
   .anim-fade-up {
     animation: fade-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;

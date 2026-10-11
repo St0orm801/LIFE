@@ -1,4 +1,4 @@
-import { c as createSieveCache, l as last, i as invariant, t as trimPathRight, f as functionalUpdate$1, a as arraysEqual, b as trimPath, r as rewriteBasepath, d as createNull, p as protocolRelativePrefixRegex, g as getUrlScheme, e as loadRouteChunk, h as preloadClientRoute, j as resolvePath, k as deepEqual, m as compileDecodeCharMap, D as DEFAULT_PROTOCOL_ALLOWLIST, n as interpolatePath, o as isNotFound, q as isRedirect, s as nullReplaceEqualDeep, u as replaceEqualDeep$1, v as decodePath, w as executeRewriteInput, x as normalizeProtocolRelative, y as parseHref, z as hasKeys, A as executeRewriteOutput, B as encodePathLikeUrl, C as rootRouteId, E as hasOwn$1, F as redirect, G as waitForReason, _ as _getAssetMatches, H as trimPathLeft, I as cleanPath, J as useRouter, K as reactExports, L as dummyMatchContext, M as matchContext, N as isDangerousProtocol, O as removeTrailingSlash, R as React, P as jsxRuntimeExports, Q as isModuleNotFoundError, S as reactUse, T as useHydrated, U as escapeHtml, V as getAssetCrossOrigin, W as getScriptPreloadAttrs, X as appendUniqueUserTags, Y as resolveManifestCssLink, Z as Outlet } from "./server-BYXv4CDl.js";
+import { c as createSieveCache, l as last, i as invariant, t as trimPathRight, f as functionalUpdate$1, a as arraysEqual, b as trimPath, r as rewriteBasepath, d as createNull, p as protocolRelativePrefixRegex, g as getUrlScheme, e as loadRouteChunk, h as preloadClientRoute, j as resolvePath, k as deepEqual, m as compileDecodeCharMap, D as DEFAULT_PROTOCOL_ALLOWLIST, n as interpolatePath, o as isNotFound, q as isRedirect, s as nullReplaceEqualDeep, u as replaceEqualDeep$1, v as decodePath, w as executeRewriteInput, x as normalizeProtocolRelative, y as parseHref, z as hasKeys, A as executeRewriteOutput, B as encodePathLikeUrl, C as rootRouteId, E as hasOwn$1, F as redirect, G as waitForReason, _ as _getAssetMatches, H as trimPathLeft, I as cleanPath, J as useRouter, K as reactExports, L as dummyMatchContext, M as matchContext, N as isDangerousProtocol, O as removeTrailingSlash, R as React, P as jsxRuntimeExports, Q as isModuleNotFoundError, S as reactUse, T as useHydrated, U as escapeHtml, V as getAssetCrossOrigin, W as getScriptPreloadAttrs, X as appendUniqueUserTags, Y as resolveManifestCssLink, Z as Outlet } from "./server-Dl6Vov1L.js";
 const SEGMENT_TYPE_INDEX = 4;
 const SEGMENT_TYPE_PATHLESS = 5;
 function getParamNames(data) {
@@ -5337,7 +5337,7 @@ var QueryClient = class {
     this.#mutationCache.clear();
   }
 };
-const appCss = "/assets/styles-CGq-Ne1g.css";
+const appCss = "/assets/styles-uIS6zPkz.css";
 const og_title = "LIFE CLOCK — Everything important has a next date";
 const og_description = "Track expirations, renewals, maintenance, warranties and birthdays in one calm, private place. Name + date. Done.";
 const og_image_url = "/assets/og.png";
@@ -5699,7 +5699,7 @@ function Landing() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("footer", { className: "border-t border-line py-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-[0.78rem] font-semibold text-ink-3", children: "LIFE CLOCK · Everything important has a next date." }) })
   ] });
 }
-const $$splitComponentImporter = () => import("./app-IEcFZlYR.js").then((n) => n.a);
+const $$splitComponentImporter = () => import("./app-D32JyOfQ.js").then((n) => n.a);
 const Route2 = createFileRoute()({
   component: lazyRouteComponent($$splitComponentImporter, "component")
 });

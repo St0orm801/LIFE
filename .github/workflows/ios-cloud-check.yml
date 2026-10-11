@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   simulator:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -20,6 +20,13 @@ jobs:
       - run: npx cap sync ios
       - name: Compile iOS on macOS without signing
         run: xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build-ios CODE_SIGNING_ALLOWED=NO build
+      - name: Capture actual iPhone and iPad app screenshots
+        run: bash scripts/ios-screenshots.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LIFE-AppStore-screenshots
+          path: build-ios/screenshots/*.png
+          retention-days: 14
       - uses: actions/upload-artifact@v4
         with:
           name: LIFE-iOS-simulator

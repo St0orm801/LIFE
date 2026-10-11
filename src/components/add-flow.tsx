@@ -67,7 +67,7 @@ export function AddFlow({ onClose }: { onClose: () => void }) {
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 py-3">
           <button
             className="flex h-10 w-10 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-surface-2"
-            aria-label="Close"
+            aria-label={step === "home" ? "Close add item" : "Back"}
             onClick={() => (step === "home" ? onClose() : step === "category" || step === 'purchase' ? setStep("home") : setStep("category"))}
           >
             {step === "home" ? <X size={22} /> : <ArrowLeft size={22} />}
@@ -89,14 +89,13 @@ export function AddFlow({ onClose }: { onClose: () => void }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search preset library"
-                autoFocus
               />
             </div>
           </div>
         ) : null}
       </header>
 
-      <div className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-10 pt-4">
+      <div className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))] pt-4">
         {step === 'home' && <button className="card mb-4 w-full p-4 text-left" onClick={() => setStep('purchase')}><span className="font-extrabold">Track a purchase →</span><span className="mt-1 block text-sm text-ink-2">Return deadline, receipt, warranty and refund follow-up.</span></button>}
         {step === 'purchase' ? <PurchaseForm onSaved={() => void onSaved()} /> : step === "home" ? (
           query.trim().length >= 2 ? (
