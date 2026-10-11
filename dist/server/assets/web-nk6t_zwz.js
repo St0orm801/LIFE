@@ -1,12 +1,12 @@
-import { W as WebPlugin, b as buildRequestInit, E as Encoding } from "./app--K3sDNid.js";
-import "./server-WjngRWTI.js";
+import { W as WebPlugin, b as buildRequestInit, E as Encoding } from "./app-C8nAJFIe.js";
+import "./server-CiM4BjEb.js";
 import "node:async_hooks";
 import "node:stream";
 import "util";
 import "crypto";
 import "async_hooks";
 import "stream";
-import "./router-e4yhlYsQ.js";
+import "./router-B897LDxH.js";
 function resolve(path) {
   const posix = path.split("/").filter((item) => item !== ".");
   const newPosix = [];

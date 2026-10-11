@@ -53,9 +53,9 @@ export function TodayView({ navigate }: { navigate: (r: Route) => void }) {
   return (
     <div className="anim-fade-up">
       <header className="mb-4">
-        <p className="text-[0.8rem] font-bold uppercase tracking-[0.16em] text-ink-3">{greeting()}</p>
+        <p className="text-[0.8rem] font-bold uppercase tracking-[0.16em] text-ink-3">{ready ? greeting() : "LIFE CLOCK"}</p>
         <h1 className="mt-1 text-[1.7rem] font-extrabold tracking-tight text-ink">
-          {formatDateLong(today)}
+          {ready ? formatDateLong(today) : "Your next dates"}
         </h1>
       </header>
       {ready && items.some(item => item.id.startsWith('demo-')) && <p className="mb-3 text-xs text-ink-2">Example records are included to show how LIFE works. They are not your purchases or documents. You can archive them from Items.</p>}

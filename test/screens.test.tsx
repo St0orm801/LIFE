@@ -9,7 +9,9 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
 import { act } from "react";
 import { createElement, type ReactNode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
+import { AppPage } from "../src/components/app-page";
 import { repository } from "../src/lib/storage";
 import { DEMO_ITEMS } from "../src/lib/demo";
 import { AppProvider } from "../src/lib/store";
@@ -107,6 +109,24 @@ describe("screen render (client, real store)", () => {
 });
 
 describe("release screen behavior", () => {
+  it("hydrates a hash route without recreating the server screen and portals navigation to body", async () => {
+    window.location.hash = "#/items";
+    const node = createElement(AppPage);
+    const html = renderToString(node);
+    expect(html).toContain("Your next dates");
+    const host = document.createElement("div");
+    host.innerHTML = html;
+    document.body.appendChild(host);
+    const errors: unknown[] = [];
+    let root: ReturnType<typeof hydrateRoot>;
+    await act(async () => { root = hydrateRoot(host, node, { onRecoverableError: error => errors.push(error) }); await sleep(80); });
+    expect(errors).toEqual([]);
+    expect(host.textContent).toContain("Items");
+    expect(document.body.querySelector('body > nav[aria-label="Main"]')).not.toBeNull();
+    await act(async () => root!.unmount());
+    host.remove();
+    window.location.hash = "#/today";
+  });
   it("Next 30 days includes the next seven days", async () => {
     const html = await mountHtml(createElement(TodayView, { navigate: noopNav as never }));
     expect(html).toContain('aria-label="2 items in Next 30 days. Open timeline"');

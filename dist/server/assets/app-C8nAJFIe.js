@@ -1,5 +1,5 @@
-import { K as reactExports, P as jsxRuntimeExports, a0 as requireReactDom } from "./server-WjngRWTI.js";
-import { p, n as nextMonthDay, a as addDays, t as todayStr, b as addYears, c as addMonths, d as diffDays, f as formatOffsetDays, m as monthDayOf, e as p$1, g as formatDateLong, h as formatRemainingDays, s as s$7, i as toDateStr, r as reminderOccurrence } from "./router-e4yhlYsQ.js";
+import { K as reactExports, P as jsxRuntimeExports, a0 as requireReactDom } from "./server-CiM4BjEb.js";
+import { p, n as nextMonthDay, a as addDays, t as todayStr, b as addYears, c as addMonths, d as diffDays, f as formatOffsetDays, m as monthDayOf, e as p$1, g as formatDateLong, h as formatRemainingDays, s as s$7, i as toDateStr, r as reminderOccurrence } from "./router-B897LDxH.js";
 const e$n = /* @__PURE__ */ new Map([
   [
     "bold",
@@ -2952,11 +2952,10 @@ function parseHash(hash) {
   }
 }
 function useHashRoute() {
-  const [route, setRoute] = reactExports.useState(
-    () => typeof window === "undefined" ? { view: "today" } : parseHash(window.location.hash)
-  );
+  const [route, setRoute] = reactExports.useState({ view: "today" });
   reactExports.useEffect(() => {
     const onHash = () => setRoute(parseHash(window.location.hash));
+    onHash();
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
@@ -3020,6 +3019,10 @@ function AppShell({
   children
 }) {
   const isAdd = route.view === "add";
+  const [portalReady, setPortalReady] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    setPortalReady(true);
+  }, []);
   const activeKey = route.view === "item" ? "items" : route.view === "calendar" ? "timeline" : route.view;
   const content = reactExports.useMemo(() => children(route, navigate), [children, route, navigate]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-auto min-h-dvh w-full max-w-5xl md:flex md:gap-0", children: [
@@ -3044,7 +3047,7 @@ function AppShell({
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex min-h-dvh min-w-0 flex-1 flex-col", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "app-main mx-auto w-full max-w-2xl flex-1 px-4 pb-28 pt-5 md:px-8 md:pb-12 md:pt-7", children: content }),
-      typeof document !== "undefined" && reactDomExports.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(
+      portalReady && !isAdd && reactDomExports.createPortal(/* @__PURE__ */ jsxRuntimeExports.jsx(
         "nav",
         {
           "aria-label": "Main",
@@ -3068,7 +3071,7 @@ function AppShell({
         }
       ), document.body)
     ] }),
-    isAdd ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 md:pl-60 lg:pl-64", children: /* @__PURE__ */ jsxRuntimeExports.jsx(AddFlow, { onClose: () => navigate({ view: "today" }) }) }) : null
+    isAdd ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { role: "dialog", "aria-modal": "true", "aria-label": "Add item", className: "fixed inset-0 z-50 md:pl-60 lg:pl-64", children: /* @__PURE__ */ jsxRuntimeExports.jsx(AddFlow, { onClose: () => navigate({ view: "today" }) }) }) : null
   ] });
 }
 function ItemRow({ item, onClick }) {
@@ -3147,8 +3150,8 @@ function TodayView({ navigate }) {
   const openItem = (id) => navigate({ view: "item", id });
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "anim-fade-up", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "mb-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.8rem] font-bold uppercase tracking-[0.16em] text-ink-3", children: greeting() }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-1 text-[1.7rem] font-extrabold tracking-tight text-ink", children: formatDateLong(today) })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.8rem] font-bold uppercase tracking-[0.16em] text-ink-3", children: ready ? greeting() : "LIFE CLOCK" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-1 text-[1.7rem] font-extrabold tracking-tight text-ink", children: ready ? formatDateLong(today) : "Your next dates" })
     ] }),
     ready && items.some((item) => item.id.startsWith("demo-")) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-3 text-xs text-ink-2", children: "Example records are included to show how LIFE works. They are not your purchases or documents. You can archive them from Items." }),
     ready && items.some((item) => item.status === "active" && isPurchase(item) && purchaseStage(item) !== "kept") && /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card p-4 mb-4 space-y-2", "aria-labelledby": "purchase-decisions", children: [
@@ -4078,7 +4081,7 @@ var Weekday;
   Weekday2[Weekday2["Saturday"] = 7] = "Saturday";
 })(Weekday || (Weekday = {}));
 const LocalNotifications = registerPlugin("LocalNotifications", {
-  web: () => import("./web-DXxZ5u09.js").then((m2) => new m2.LocalNotificationsWeb())
+  web: () => import("./web-cjro9opK.js").then((m2) => new m2.LocalNotificationsWeb())
 });
 function planDeviceReminders(items, now = /* @__PURE__ */ new Date(), time = "09:00") {
   const reminderTime2 = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : "09:00";
@@ -4195,11 +4198,11 @@ var Encoding;
   Encoding2["UTF16"] = "utf16";
 })(Encoding || (Encoding = {}));
 const Filesystem = registerPlugin("Filesystem", {
-  web: () => import("./web-BaS-9Nva.js").then((m2) => new m2.FilesystemWeb())
+  web: () => import("./web-nk6t_zwz.js").then((m2) => new m2.FilesystemWeb())
 });
 f();
 const Share = registerPlugin("Share", {
-  web: () => import("./web-SeqATuNu.js").then((m2) => new m2.ShareWeb())
+  web: () => import("./web-7Lij8yGq.js").then((m2) => new m2.ShareWeb())
 });
 async function shareAttachment(filename, blob) {
   const bytes = new Uint8Array(await blob.arrayBuffer());
@@ -4903,7 +4906,7 @@ function MoreView({ navigate }) {
   ] });
 }
 const App = registerPlugin("App", {
-  web: () => import("./web-B5_k5311.js").then((m2) => new m2.AppWeb())
+  web: () => import("./web-DGyjd6Sa.js").then((m2) => new m2.AppWeb())
 });
 function DeviceEvents() {
   const { items, ready } = useApp();

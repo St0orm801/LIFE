@@ -37,12 +37,12 @@ export function parseHash(hash: string): Route {
 }
 
 export function useHashRoute(): [Route, (r: Route) => void] {
-  const [route, setRoute] = useState<Route>(() =>
-    typeof window === "undefined" ? { view: "today" } : parseHash(window.location.hash),
-  );
+  // Server and first client render must match; the URL is read after hydration.
+  const [route, setRoute] = useState<Route>({ view: "today" });
 
   useEffect(() => {
     const onHash = () => setRoute(parseHash(window.location.hash));
+    onHash();
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
@@ -104,6 +104,8 @@ export function AppShell({
   children: (r: Route, navigate: (r: Route) => void) => ReactNode;
 }) {
   const isAdd = route.view === "add";
+  const [portalReady, setPortalReady] = useState(false);
+  useEffect(() => { setPortalReady(true); }, []);
   const activeKey = route.view === "item" ? "items" : route.view === "calendar" ? "timeline" : route.view;
 
   const content = useMemo(() => children(route, navigate), [children, route, navigate]);
@@ -144,7 +146,7 @@ export function AppShell({
         </main>
 
         {/* Mobile bottom nav */}
-        {typeof document !== "undefined" && createPortal(<nav
+        {portalReady && !isAdd && createPortal(<nav
           aria-label="Main"
           className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur safe-bottom md:hidden"
         >
@@ -169,7 +171,7 @@ export function AppShell({
 
       {/* Add flow overlays the app (modal) */}
       {isAdd ? (
-        <div className="fixed inset-0 z-50 md:pl-60 lg:pl-64">
+        <div role="dialog" aria-modal="true" aria-label="Add item" className="fixed inset-0 z-50 md:pl-60 lg:pl-64">
           <AddFlow onClose={() => navigate({ view: "today" })} />
         </div>
       ) : null}
