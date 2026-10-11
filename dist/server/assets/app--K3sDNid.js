@@ -1,5 +1,5 @@
-import { K as reactExports, P as jsxRuntimeExports, a0 as requireReactDom } from "./server-Dl6Vov1L.js";
-import { p, n as nextMonthDay, a as addDays, t as todayStr, b as addYears, c as addMonths, d as diffDays, f as formatOffsetDays, m as monthDayOf, e as p$1, g as formatDateLong, h as formatRemainingDays, s as s$7, i as toDateStr, r as reminderOccurrence } from "./router-D0iB5776.js";
+import { K as reactExports, P as jsxRuntimeExports, a0 as requireReactDom } from "./server-WjngRWTI.js";
+import { p, n as nextMonthDay, a as addDays, t as todayStr, b as addYears, c as addMonths, d as diffDays, f as formatOffsetDays, m as monthDayOf, e as p$1, g as formatDateLong, h as formatRemainingDays, s as s$7, i as toDateStr, r as reminderOccurrence } from "./router-e4yhlYsQ.js";
 const e$n = /* @__PURE__ */ new Map([
   [
     "bold",
@@ -3560,357 +3560,6 @@ function ItemsView({ navigate }) {
     ] }) : null
   ] });
 }
-function Avatar({ item }) {
-  const color = CATEGORY_BY_ID[item.categoryId]?.color ?? "#8a8274";
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "span",
-    {
-      "aria-hidden": true,
-      className: "flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl",
-      style: { background: `color-mix(in srgb, ${color} 16%, white)`, color, width: 52, height: 52 },
-      children: /* @__PURE__ */ jsxRuntimeExports.jsx(CatDot, { categoryId: item.categoryId, size: 24 })
-    }
-  );
-}
-function ItemDetailView({
-  id,
-  navigate
-}) {
-  const { items, ready, getItem, lifecycle, archiveItem, restoreItem, deleteItem, setNotes, attachFiles, removeAttachment, loadBlob, historyFor } = useApp();
-  const [history, setHistory] = reactExports.useState([]);
-  const [noteDraft, setNoteDraft] = reactExports.useState(null);
-  const [renewOpen, setRenewOpen] = reactExports.useState(false);
-  const [renewDate, setRenewDate] = reactExports.useState("");
-  const [confirmDelete, setConfirmDelete] = reactExports.useState(false);
-  const [attachments, setAttachments] = reactExports.useState(/* @__PURE__ */ new Map());
-  const fileRef = reactExports.useRef(null);
-  const item = getItem(id);
-  const today = todayStr();
-  const preset = item ? PRESET_BY_ID[item.presetId] : void 0;
-  const verb = item ? verbFor(item) : void 0;
-  reactExports.useEffect(() => {
-    if (!item) return;
-    setNoteDraft(item.notes ?? "");
-    void historyFor(item.id).then((h) => setHistory([...h].sort((a2, b) => b.date - a2.date)));
-    setAttachments(/* @__PURE__ */ new Map());
-    let active = true;
-    item.attachments.forEach((a2) => {
-      void loadBlob(a2.id).then((b) => {
-        if (b && active) {
-          setAttachments((prev) => {
-            const next = new Map(prev);
-            next.set(a2.id, b);
-            return next;
-          });
-        }
-      });
-    });
-    return () => {
-      active = false;
-    };
-  }, [item?.id, item?.updatedAt]);
-  const attachmentUrls = reactExports.useMemo(() => new Map([...attachments].map(([key, blob]) => [key, URL.createObjectURL(blob)])), [attachments]);
-  reactExports.useEffect(() => () => {
-    attachmentUrls.forEach((url) => URL.revokeObjectURL(url));
-  }, [attachmentUrls]);
-  const status = item ? deriveStatus(item, today) : "archived";
-  const statusLabel = item ? statusMeta(status).label : "";
-  const onLifecycle = reactExports.useCallback(async () => {
-    if (!item) return;
-    const preview = applyLifecycle(item);
-    if (!preview.completed && !preview.nextDate) {
-      setRenewOpen(true);
-      setHistory(await historyFor(item.id));
-      return;
-    }
-    await lifecycle(item.id);
-    setRenewOpen(false);
-    setRenewDate("");
-    setHistory(await historyFor(item.id));
-  }, [item, lifecycle, historyFor]);
-  if (!ready) return /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "py-10 text-center text-sm text-ink-3", children: "Loading…" });
-  if (!item) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "card p-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm text-ink-3", children: "This item no longer exists." }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-secondary mt-4 btn-block", onClick: () => navigate({ view: "items" }), children: "Back to items" })
-    ] });
-  }
-  const diff = diffDays(today, item.nextDate);
-  const actions = preset?.lifecycle ?? (verb ? { action: verb.action } : void 0);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "anim-fade-up", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "button",
-      {
-        className: "mb-4 flex items-center gap-1.5 text-[0.85rem] font-bold text-ink-2 transition-colors hover:text-ink",
-        onClick: () => navigate({ view: "items" }),
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(s$5, { size: 17, weight: "bold" }),
-          "Items"
-        ]
-      }
-    ),
-    isPurchase(item) && /* @__PURE__ */ jsxRuntimeExports.jsx(PurchaseActions, { item, onChanged: async () => setHistory((await historyFor(item.id)).sort((a2, b) => b.date - a2.date)) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "card overflow-hidden", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-5 pb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start gap-3.5", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Avatar, { item }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0 flex-1", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "truncate text-[1.25rem] font-extrabold tracking-tight text-ink", children: item.title }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "span",
-            {
-              className: `mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.7rem] font-bold uppercase tracking-wide pill-${statusTone(status)}`,
-              children: statusLabel
-            }
-          )
-        ] })
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "px-5 pb-5 pt-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-end justify-between rounded-2xl surface-2 px-4 py-3.5", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.72rem] font-bold uppercase tracking-[0.12em] text-ink-3", children: actionVerbLabel(item.actionType) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "tnum mt-0.5 text-[1.35rem] font-extrabold leading-tight text-ink", children: formatDateLong(item.nextDate) })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-right", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.72rem] font-bold uppercase tracking-[0.12em] text-ink-3", children: "Time remaining" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "tnum mt-0.5 text-[1.05rem] font-extrabold text-ink", children: diff < 0 ? `${-diff}d overdue` : formatRemainingDays(diff) })
-          ] })
-        ] }),
-        item.status === "active" && !isPurchase(item) ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-primary btn-block btn-lg", onClick: onLifecycle, children: actions?.action ?? verb?.action ?? "Done" }),
-          actions?.secondary ? /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              className: "btn btn-secondary btn-block mt-2",
-              onClick: () => void lifecycle(item.id),
-              children: actions.secondary.action
-            }
-          ) : null,
-          renewOpen ? /* @__PURE__ */ jsxRuntimeExports.jsx(
-            RenewPanel,
-            {
-              suggested: suggestedNewDate(item),
-              value: renewDate,
-              onChange: setRenewDate,
-              onCancel: () => setRenewOpen(false),
-              onContinue: () => {
-                if (!renewDate) return;
-                void (async () => {
-                  await lifecycle(item.id, { newDate: renewDate });
-                  setRenewOpen(false);
-                  setRenewDate("");
-                  setHistory(await historyFor(item.id));
-                })();
-              }
-            }
-          ) : null
-        ] }) : item.status === "archived" ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-4 flex gap-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-secondary flex-1", onClick: () => void restoreItem(item.id), children: "Restore" }) }) : null,
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 flex flex-wrap gap-2", children: [
-          !isPurchase(item) && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm", onClick: () => setRenewOpen((v) => !v), children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(m$1, { size: 15 }),
-            "Edit date"
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm", onClick: () => void archiveItem(item.id), children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(s$6, { size: 15 }),
-            item.status === "archived" ? "Unarchive" : "Archive"
-          ] }),
-          item.status === "active" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm text-clay", onClick: () => setConfirmDelete(true), children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(n$1, { size: 15 }),
-            "Delete"
-          ] }) : null
-        ] })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card mt-4 p-5", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "mb-3 text-[0.85rem] font-extrabold text-ink", children: "Reminders" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-2", children: [
-        reminderOffsets(item.reminderRules).map((off) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center justify-between rounded-xl surface-2 px-3.5 py-2.5", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-[0.88rem] font-semibold text-ink-2", children: [
-            formatOffsetDays(off),
-            " before"
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "tnum text-[0.82rem] font-semibold text-ink-3", children: formatDateLong(reminderOccurrence(item.nextDate, off)) })
-        ] }, off)),
-        reminderOffsets(item.reminderRules).length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "text-[0.85rem] text-ink-3", children: "No reminders set." }) : null
-      ] }),
-      item.amount != null ? /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-3 text-[0.82rem] font-semibold text-ink-3", children: [
-        "Amount: ",
-        formatMoney(item.amount)
-      ] }) : null
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card mt-4 p-5", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "mb-2 text-[0.85rem] font-extrabold text-ink", children: "Notes" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "textarea",
-        {
-          className: "input min-h-[76px] resize-y",
-          placeholder: "Optional note, e.g. 'Renew online'",
-          value: noteDraft ?? "",
-          onChange: (e2) => setNoteDraft(e2.target.value),
-          onBlur: () => {
-            if (noteDraft != null) void setNotes(item.id, noteDraft);
-          }
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card mt-4 p-5", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-3 flex items-center justify-between", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-[0.85rem] font-extrabold text-ink", children: "Attachments" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-1.5", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm", onClick: () => fileRef.current?.click(), children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(m, { size: 15 }),
-            "File"
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm", onClick: () => fileRef.current?.click(), children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(n$8, { size: 15 }),
-            "Photo"
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "input",
-            {
-              ref: fileRef,
-              type: "file",
-              className: "hidden",
-              accept: "image/*,application/pdf,.pdf",
-              multiple: true,
-              onChange: async (e2) => {
-                const files = Array.from(e2.target.files ?? []);
-                if (files.length === 0) return;
-                const kind = files.every((f2) => f2.type.startsWith("image/")) ? "photo" : "file";
-                await attachFiles(item.id, files, kind);
-                e2.target.value = "";
-              }
-            }
-          )
-        ] })
-      ] }),
-      item.attachments.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.85rem] text-ink-3", children: "No photos or files yet. Receipts, warranty cards, passports — keep them here." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "grid grid-cols-3 gap-2.5 sm:grid-cols-4", children: item.attachments.map((a2) => {
-        attachments.get(a2.id);
-        const url = attachmentUrls.get(a2.id) ?? null;
-        return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "group relative", children: [
-          a2.kind === "photo" && url ? /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "img",
-            {
-              src: url,
-              alt: a2.filename,
-              className: "h-24 w-full rounded-xl border border-line object-cover",
-              loading: "lazy"
-            }
-          ) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "a",
-            {
-              href: url ?? "#",
-              download: a2.filename,
-              className: "flex h-24 flex-col items-center justify-center gap-1 rounded-xl border border-line bg-surface-2 px-2 text-center",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: a2.mime === "application/pdf" ? "text-clay" : "text-ink-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(c$1, { size: 22 }) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "line-clamp-2 text-[0.65rem] font-semibold text-ink-2", children: a2.filename })
-              ]
-            }
-          ),
-          url ? /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "a",
-            {
-              href: url,
-              download: a2.filename,
-              className: "absolute inset-0 rounded-xl",
-              "aria-label": `Open ${a2.filename}`
-            }
-          ) : null,
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              className: "absolute right-1 top-1 flex h-9 w-9 items-center justify-center rounded-full bg-ink/70 text-white transition-opacity",
-              "aria-label": `Remove ${a2.filename}`,
-              onClick: () => void removeAttachment(item.id, a2.id),
-              children: /* @__PURE__ */ jsxRuntimeExports.jsx(n$1, { size: 12 })
-            }
-          )
-        ] }, a2.id);
-      }) })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card mt-4 p-5", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "mb-3 text-[0.85rem] font-extrabold text-ink", children: "History" }),
-      history.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.85rem] text-ink-3", children: "No changes yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ol", { className: "relative space-y-3 border-l border-line pl-4", children: history.map((h) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "relative", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "absolute -left-[21.5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-teal/70" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.85rem] font-semibold text-ink", children: formatHistoryEvent(h) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "tnum text-[0.72rem] text-ink-3", children: new Date(h.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) })
-      ] }, h.id)) })
-    ] }),
-    confirmDelete ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 md:items-center", onClick: () => setConfirmDelete(false), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "sheet w-full max-w-sm p-6", onClick: (e2) => e2.stopPropagation(), children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-[1.05rem] font-extrabold text-ink", children: [
-        "Delete “",
-        item.title,
-        "”?"
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-sm text-ink-2", children: "This removes the item, its history and attachments from this browser. This cannot be undone." }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-5 flex gap-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-secondary flex-1", onClick: () => setConfirmDelete(false), children: "Cancel" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            className: "btn btn-danger flex-1",
-            onClick: () => {
-              void (async () => {
-                await deleteItem(item.id);
-                navigate({ view: "items" });
-              })();
-            },
-            children: "Delete"
-          }
-        )
-      ] })
-    ] }) }) : null
-  ] });
-}
-function RenewPanel({
-  suggested,
-  value,
-  onChange,
-  onCancel,
-  onContinue
-}) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "anim-fade-in mt-3 rounded-2xl border border-line bg-surface p-4", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-2 text-[0.85rem] font-bold text-ink", children: "New date" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "input",
-      {
-        type: "date",
-        className: "input",
-        min: todayStr(),
-        value: value || suggested,
-        onChange: (e2) => onChange(e2.target.value),
-        "aria-label": "New date"
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "field-note", children: [
-      "Suggested: ",
-      formatDateLong(suggested)
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-3 flex gap-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-secondary flex-1", onClick: onCancel, children: "Cancel" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-primary flex-1", onClick: onContinue, disabled: !value, children: "Save new date" })
-    ] })
-  ] });
-}
-function statusTone(status) {
-  switch (status) {
-    case "due-soon":
-      return "gold";
-    case "overdue":
-      return "clay";
-    case "expired":
-      return "red";
-    case "completed":
-      return "slate";
-    case "archived":
-      return "gray";
-    default:
-      return "teal";
-  }
-}
-function formatMoney(n2) {
-  return n2.toLocaleString("en-US", { style: "currency", currency: "USD" });
-}
 var ExceptionCode;
 (function(ExceptionCode2) {
   ExceptionCode2["Unimplemented"] = "UNIMPLEMENTED";
@@ -4418,6 +4067,70 @@ class SystemBarsPluginWeb extends WebPlugin {
 registerPlugin("SystemBars", {
   web: () => new SystemBarsPluginWeb()
 });
+var Weekday;
+(function(Weekday2) {
+  Weekday2[Weekday2["Sunday"] = 1] = "Sunday";
+  Weekday2[Weekday2["Monday"] = 2] = "Monday";
+  Weekday2[Weekday2["Tuesday"] = 3] = "Tuesday";
+  Weekday2[Weekday2["Wednesday"] = 4] = "Wednesday";
+  Weekday2[Weekday2["Thursday"] = 5] = "Thursday";
+  Weekday2[Weekday2["Friday"] = 6] = "Friday";
+  Weekday2[Weekday2["Saturday"] = 7] = "Saturday";
+})(Weekday || (Weekday = {}));
+const LocalNotifications = registerPlugin("LocalNotifications", {
+  web: () => import("./web-DXxZ5u09.js").then((m2) => new m2.LocalNotificationsWeb())
+});
+function planDeviceReminders(items, now = /* @__PURE__ */ new Date(), time = "09:00") {
+  const reminderTime2 = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : "09:00";
+  const events = [];
+  const used = /* @__PURE__ */ new Set();
+  for (const item of items) {
+    if (item.status !== "active") continue;
+    const offsets = reminderOffsets(item.reminderRules);
+    if (!offsets.length) continue;
+    for (const deadline of purchaseDeadlines(item)) for (const offset of /* @__PURE__ */ new Set([...offsets, 0])) {
+      if (!Number.isFinite(offset) || offset < 0) continue;
+      const at = /* @__PURE__ */ new Date(`${addDays(deadline.date, -offset)}T${reminderTime2}:00`);
+      if (!Number.isFinite(at.getTime()) || at <= now) continue;
+      const key = `${item.id}:${deadline.key}:${deadline.date}:${offset}`;
+      let id = 1;
+      for (const char of key) id = Math.imul(id, 31) + char.charCodeAt(0) & 2147483647;
+      while (!id || used.has(id)) id = id + 1 & 2147483647;
+      used.add(id);
+      events.push({ id, title: item.title, body: `${deadline.label} · ${offset ? `${offset} days until ${deadline.date}` : `Today · ${deadline.date}`}`, at, itemId: item.id });
+    }
+  }
+  return events.sort((a2, b) => a2.at.getTime() - b.at.getTime()).slice(0, 60);
+}
+const isNativeApp = () => Capacitor.isNativePlatform();
+const reminderTime = () => typeof localStorage === "undefined" ? "09:00" : localStorage.getItem("life-reminder-time") || "09:00";
+async function reminderPermission() {
+  return isNativeApp() ? (await LocalNotifications.checkPermissions()).display : "unsupported";
+}
+async function testDeviceReminder() {
+  if (await reminderPermission() !== "granted") throw new Error("Notifications are not enabled");
+  await LocalNotifications.schedule({ notifications: [{ id: 2147483646, title: "LIFE reminder test", sound: "default", body: "LIFE test notification. Delivery depends on sound, Focus and battery settings.", schedule: { at: new Date(Date.now() + 2e4) } }] });
+}
+let syncQueue = Promise.resolve();
+function syncDeviceReminders(items) {
+  syncQueue = syncQueue.catch(() => {
+  }).then(async () => {
+    if (!isNativeApp()) return;
+    const permission = await LocalNotifications.checkPermissions();
+    if (permission.display !== "granted") return;
+    const pending = await LocalNotifications.getPending();
+    if (pending.notifications.length) await LocalNotifications.cancel(pending);
+    if (Capacitor.getPlatform() === "android") await LocalNotifications.createChannel({ id: "life-deadlines", name: "Dates and return deadlines", importance: 4, visibility: 0, vibration: true });
+    const notifications = planDeviceReminders(items, /* @__PURE__ */ new Date(), reminderTime()).map(({ at, itemId, ...event }) => ({ ...event, sound: "default", channelId: "life-deadlines", schedule: { at }, extra: { itemId } }));
+    if (notifications.length) await LocalNotifications.schedule({ notifications });
+  });
+  return syncQueue;
+}
+async function enableDeviceReminders(items) {
+  const result = await LocalNotifications.requestPermissions();
+  if (result.display === "granted") await syncDeviceReminders(items);
+  return result.display;
+}
 function s(t2) {
   t2.CapacitorUtils.Synapse = new Proxy(
     {},
@@ -4482,12 +4195,22 @@ var Encoding;
   Encoding2["UTF16"] = "utf16";
 })(Encoding || (Encoding = {}));
 const Filesystem = registerPlugin("Filesystem", {
-  web: () => import("./web-DD1IhAI5.js").then((m2) => new m2.FilesystemWeb())
+  web: () => import("./web-BaS-9Nva.js").then((m2) => new m2.FilesystemWeb())
 });
 f();
 const Share = registerPlugin("Share", {
-  web: () => import("./web-Dwhpzpil.js").then((m2) => new m2.ShareWeb())
+  web: () => import("./web-SeqATuNu.js").then((m2) => new m2.ShareWeb())
 });
+async function shareAttachment(filename, blob) {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let binary = "";
+  for (let offset = 0; offset < bytes.length; offset += 8192) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
+  }
+  const safeName = filename.replace(/[\\/\u0000-\u001f:]/g, "_") || "attachment";
+  const { uri } = await Filesystem.writeFile({ path: `life-${Date.now()}-${safeName}`, data: btoa(binary), directory: Directory.Cache });
+  await Share.share({ title: filename, files: [uri] });
+}
 async function exportTextFile(filename, content, mime) {
   if (Capacitor.isNativePlatform()) {
     const { uri } = await Filesystem.writeFile({ path: filename, data: content, directory: Directory.Cache, encoding: Encoding.UTF8 });
@@ -4502,6 +4225,364 @@ async function exportTextFile(filename, content, mime) {
   a2.click();
   a2.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1e3);
+}
+function Avatar({ item }) {
+  const color = CATEGORY_BY_ID[item.categoryId]?.color ?? "#8a8274";
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "span",
+    {
+      "aria-hidden": true,
+      className: "flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl",
+      style: { background: `color-mix(in srgb, ${color} 16%, white)`, color, width: 52, height: 52 },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx(CatDot, { categoryId: item.categoryId, size: 24 })
+    }
+  );
+}
+function ItemDetailView({
+  id,
+  navigate
+}) {
+  const { items, ready, getItem, lifecycle, archiveItem, restoreItem, deleteItem, setNotes, attachFiles, removeAttachment, loadBlob, historyFor } = useApp();
+  const [history, setHistory] = reactExports.useState([]);
+  const [noteDraft, setNoteDraft] = reactExports.useState(null);
+  const [renewOpen, setRenewOpen] = reactExports.useState(false);
+  const [renewDate, setRenewDate] = reactExports.useState("");
+  const [confirmDelete, setConfirmDelete] = reactExports.useState(false);
+  const [attachments, setAttachments] = reactExports.useState(/* @__PURE__ */ new Map());
+  const [fileMessage, setFileMessage] = reactExports.useState("");
+  const fileRef = reactExports.useRef(null);
+  const item = getItem(id);
+  const today = todayStr();
+  const preset = item ? PRESET_BY_ID[item.presetId] : void 0;
+  const verb = item ? verbFor(item) : void 0;
+  reactExports.useEffect(() => {
+    if (!item) return;
+    setNoteDraft(item.notes ?? "");
+    void historyFor(item.id).then((h) => setHistory([...h].sort((a2, b) => b.date - a2.date)));
+    setAttachments(/* @__PURE__ */ new Map());
+    let active = true;
+    item.attachments.forEach((a2) => {
+      void loadBlob(a2.id).then((b) => {
+        if (b && active) {
+          setAttachments((prev) => {
+            const next = new Map(prev);
+            next.set(a2.id, b);
+            return next;
+          });
+        }
+      });
+    });
+    return () => {
+      active = false;
+    };
+  }, [item?.id, item?.updatedAt]);
+  const attachmentUrls = reactExports.useMemo(() => new Map([...attachments].map(([key, blob]) => [key, URL.createObjectURL(blob)])), [attachments]);
+  reactExports.useEffect(() => () => {
+    attachmentUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [attachmentUrls]);
+  const status = item ? deriveStatus(item, today) : "archived";
+  const statusLabel = item ? statusMeta(status).label : "";
+  const onLifecycle = reactExports.useCallback(async () => {
+    if (!item) return;
+    const preview = applyLifecycle(item);
+    if (!preview.completed && !preview.nextDate) {
+      setRenewOpen(true);
+      setHistory(await historyFor(item.id));
+      return;
+    }
+    await lifecycle(item.id);
+    setRenewOpen(false);
+    setRenewDate("");
+    setHistory(await historyFor(item.id));
+  }, [item, lifecycle, historyFor]);
+  if (!ready) return /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "py-10 text-center text-sm text-ink-3", children: "Loading…" });
+  if (!item) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "card p-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm text-ink-3", children: "This item no longer exists." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-secondary mt-4 btn-block", onClick: () => navigate({ view: "items" }), children: "Back to items" })
+    ] });
+  }
+  const diff = diffDays(today, item.nextDate);
+  const actions = preset?.lifecycle ?? (verb ? { action: verb.action } : void 0);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "anim-fade-up", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        className: "mb-4 flex items-center gap-1.5 text-[0.85rem] font-bold text-ink-2 transition-colors hover:text-ink",
+        onClick: () => navigate({ view: "items" }),
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(s$5, { size: 17, weight: "bold" }),
+          "Items"
+        ]
+      }
+    ),
+    isPurchase(item) && /* @__PURE__ */ jsxRuntimeExports.jsx(PurchaseActions, { item, onChanged: async () => setHistory((await historyFor(item.id)).sort((a2, b) => b.date - a2.date)) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "card overflow-hidden", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-5 pb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start gap-3.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Avatar, { item }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0 flex-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "truncate text-[1.25rem] font-extrabold tracking-tight text-ink", children: item.title }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "span",
+            {
+              className: `mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.7rem] font-bold uppercase tracking-wide pill-${statusTone(status)}`,
+              children: statusLabel
+            }
+          )
+        ] })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "px-5 pb-5 pt-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-end justify-between rounded-2xl surface-2 px-4 py-3.5", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.72rem] font-bold uppercase tracking-[0.12em] text-ink-3", children: actionVerbLabel(item.actionType) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "tnum mt-0.5 text-[1.35rem] font-extrabold leading-tight text-ink", children: formatDateLong(item.nextDate) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-right", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.72rem] font-bold uppercase tracking-[0.12em] text-ink-3", children: "Time remaining" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "tnum mt-0.5 text-[1.05rem] font-extrabold text-ink", children: diff < 0 ? `${-diff}d overdue` : formatRemainingDays(diff) })
+          ] })
+        ] }),
+        item.status === "active" && !isPurchase(item) ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-primary btn-block btn-lg", onClick: onLifecycle, children: actions?.action ?? verb?.action ?? "Done" }),
+          actions?.secondary ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              className: "btn btn-secondary btn-block mt-2",
+              onClick: () => void lifecycle(item.id),
+              children: actions.secondary.action
+            }
+          ) : null,
+          renewOpen ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+            RenewPanel,
+            {
+              suggested: suggestedNewDate(item),
+              value: renewDate,
+              onChange: setRenewDate,
+              onCancel: () => setRenewOpen(false),
+              onContinue: () => {
+                if (!renewDate) return;
+                void (async () => {
+                  await lifecycle(item.id, { newDate: renewDate });
+                  setRenewOpen(false);
+                  setRenewDate("");
+                  setHistory(await historyFor(item.id));
+                })();
+              }
+            }
+          ) : null
+        ] }) : item.status === "archived" ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-4 flex gap-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-secondary flex-1", onClick: () => void restoreItem(item.id), children: "Restore" }) }) : null,
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 flex flex-wrap gap-2", children: [
+          !isPurchase(item) && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm", onClick: () => setRenewOpen((v) => !v), children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(m$1, { size: 15 }),
+            "Edit date"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm", onClick: () => void archiveItem(item.id), children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(s$6, { size: 15 }),
+            item.status === "archived" ? "Unarchive" : "Archive"
+          ] }),
+          item.status === "active" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm text-clay", onClick: () => setConfirmDelete(true), children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(n$1, { size: 15 }),
+            "Delete"
+          ] }) : null
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card mt-4 p-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "mb-3 text-[0.85rem] font-extrabold text-ink", children: "Reminders" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-2", children: [
+        reminderOffsets(item.reminderRules).map((off) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center justify-between rounded-xl surface-2 px-3.5 py-2.5", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-[0.88rem] font-semibold text-ink-2", children: [
+            formatOffsetDays(off),
+            " before"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "tnum text-[0.82rem] font-semibold text-ink-3", children: formatDateLong(reminderOccurrence(item.nextDate, off)) })
+        ] }, off)),
+        reminderOffsets(item.reminderRules).length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "text-[0.85rem] text-ink-3", children: "No reminders set." }) : null
+      ] }),
+      item.amount != null ? /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-3 text-[0.82rem] font-semibold text-ink-3", children: [
+        "Amount: ",
+        formatMoney(item.amount)
+      ] }) : null
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card mt-4 p-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "mb-2 text-[0.85rem] font-extrabold text-ink", children: "Notes" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "textarea",
+        {
+          className: "input min-h-[76px] resize-y",
+          placeholder: "Optional note, e.g. 'Renew online'",
+          value: noteDraft ?? "",
+          onChange: (e2) => setNoteDraft(e2.target.value),
+          onBlur: () => {
+            if (noteDraft != null) void setNotes(item.id, noteDraft);
+          }
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card mt-4 p-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-3 flex items-center justify-between", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-[0.85rem] font-extrabold text-ink", children: "Attachments" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-1.5", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm", onClick: () => fileRef.current?.click(), children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(m, { size: 15 }),
+            "File"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn-ghost btn-sm", onClick: () => fileRef.current?.click(), children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(n$8, { size: 15 }),
+            "Photo"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "input",
+            {
+              ref: fileRef,
+              type: "file",
+              className: "hidden",
+              accept: "image/*,application/pdf,.pdf",
+              multiple: true,
+              onChange: async (e2) => {
+                const files = Array.from(e2.target.files ?? []);
+                if (files.length === 0) return;
+                const kind = files.every((f2) => f2.type.startsWith("image/")) ? "photo" : "file";
+                await attachFiles(item.id, files, kind);
+                e2.target.value = "";
+              }
+            }
+          )
+        ] })
+      ] }),
+      item.attachments.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.85rem] text-ink-3", children: "No photos or files yet. Receipts, warranty cards, passports — keep them here." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "grid grid-cols-3 gap-2.5 sm:grid-cols-4", children: item.attachments.map((a2) => {
+        const blob = attachments.get(a2.id);
+        const url = attachmentUrls.get(a2.id) ?? null;
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "group relative", children: [
+          a2.kind === "photo" && url ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "img",
+            {
+              src: url,
+              alt: a2.filename,
+              className: "h-24 w-full rounded-xl border border-line object-cover",
+              loading: "lazy"
+            }
+          ) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "a",
+            {
+              href: url ?? "#",
+              download: a2.filename,
+              className: "flex h-24 flex-col items-center justify-center gap-1 rounded-xl border border-line bg-surface-2 px-2 text-center",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: a2.mime === "application/pdf" ? "text-clay" : "text-ink-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(c$1, { size: 22 }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "line-clamp-2 text-[0.65rem] font-semibold text-ink-2", children: a2.filename })
+              ]
+            }
+          ),
+          url ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "a",
+            {
+              href: url,
+              download: a2.filename,
+              className: "absolute inset-0 rounded-xl",
+              "aria-label": `Open ${a2.filename}`,
+              onClick: (event) => {
+                if (!isNativeApp() || !blob) return;
+                event.preventDefault();
+                void shareAttachment(a2.filename, blob).catch(() => setFileMessage("Could not open the file share sheet. Try again."));
+              }
+            }
+          ) : null,
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              className: "absolute right-1 top-1 flex h-9 w-9 items-center justify-center rounded-full bg-ink/70 text-white transition-opacity",
+              "aria-label": `Remove ${a2.filename}`,
+              onClick: () => void removeAttachment(item.id, a2.id),
+              children: /* @__PURE__ */ jsxRuntimeExports.jsx(n$1, { size: 12 })
+            }
+          )
+        ] }, a2.id);
+      }) })
+    ] }),
+    fileMessage && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { role: "status", className: "mt-3 text-sm text-clay", children: fileMessage }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card mt-4 p-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "mb-3 text-[0.85rem] font-extrabold text-ink", children: "History" }),
+      history.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.85rem] text-ink-3", children: "No changes yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ol", { className: "relative space-y-3 border-l border-line pl-4", children: history.map((h) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "relative", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "absolute -left-[21.5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-teal/70" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.85rem] font-semibold text-ink", children: formatHistoryEvent(h) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "tnum text-[0.72rem] text-ink-3", children: new Date(h.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) })
+      ] }, h.id)) })
+    ] }),
+    confirmDelete ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 md:items-center", onClick: () => setConfirmDelete(false), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "sheet w-full max-w-sm p-6", onClick: (e2) => e2.stopPropagation(), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-[1.05rem] font-extrabold text-ink", children: [
+        "Delete “",
+        item.title,
+        "”?"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-sm text-ink-2", children: "This removes the item, its history and attachments from this browser. This cannot be undone." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-5 flex gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-secondary flex-1", onClick: () => setConfirmDelete(false), children: "Cancel" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            className: "btn btn-danger flex-1",
+            onClick: () => {
+              void (async () => {
+                await deleteItem(item.id);
+                navigate({ view: "items" });
+              })();
+            },
+            children: "Delete"
+          }
+        )
+      ] })
+    ] }) }) : null
+  ] });
+}
+function RenewPanel({
+  suggested,
+  value,
+  onChange,
+  onCancel,
+  onContinue
+}) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "anim-fade-in mt-3 rounded-2xl border border-line bg-surface p-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-2 text-[0.85rem] font-bold text-ink", children: "New date" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "input",
+      {
+        type: "date",
+        className: "input",
+        min: todayStr(),
+        value: value || suggested,
+        onChange: (e2) => onChange(e2.target.value),
+        "aria-label": "New date"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "field-note", children: [
+      "Suggested: ",
+      formatDateLong(suggested)
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-3 flex gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-secondary flex-1", onClick: onCancel, children: "Cancel" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-primary flex-1", onClick: onContinue, disabled: !value, children: "Save new date" })
+    ] })
+  ] });
+}
+function statusTone(status) {
+  switch (status) {
+    case "due-soon":
+      return "gold";
+    case "overdue":
+      return "clay";
+    case "expired":
+      return "red";
+    case "completed":
+      return "slate";
+    case "archived":
+      return "gray";
+    default:
+      return "teal";
+  }
+}
+function formatMoney(n2) {
+  return n2.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 function icsDate(d) {
   return d.replace(/-/g, "");
@@ -4603,70 +4684,6 @@ async function requestPermission() {
   if (!notificationsSupported()) return "unsupported";
   const p2 = await Notification.requestPermission();
   return p2;
-}
-var Weekday;
-(function(Weekday2) {
-  Weekday2[Weekday2["Sunday"] = 1] = "Sunday";
-  Weekday2[Weekday2["Monday"] = 2] = "Monday";
-  Weekday2[Weekday2["Tuesday"] = 3] = "Tuesday";
-  Weekday2[Weekday2["Wednesday"] = 4] = "Wednesday";
-  Weekday2[Weekday2["Thursday"] = 5] = "Thursday";
-  Weekday2[Weekday2["Friday"] = 6] = "Friday";
-  Weekday2[Weekday2["Saturday"] = 7] = "Saturday";
-})(Weekday || (Weekday = {}));
-const LocalNotifications = registerPlugin("LocalNotifications", {
-  web: () => import("./web-CzhNUEjq.js").then((m2) => new m2.LocalNotificationsWeb())
-});
-function planDeviceReminders(items, now = /* @__PURE__ */ new Date(), time = "09:00") {
-  const reminderTime2 = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : "09:00";
-  const events = [];
-  const used = /* @__PURE__ */ new Set();
-  for (const item of items) {
-    if (item.status !== "active") continue;
-    const offsets = reminderOffsets(item.reminderRules);
-    if (!offsets.length) continue;
-    for (const deadline of purchaseDeadlines(item)) for (const offset of /* @__PURE__ */ new Set([...offsets, 0])) {
-      if (!Number.isFinite(offset) || offset < 0) continue;
-      const at = /* @__PURE__ */ new Date(`${addDays(deadline.date, -offset)}T${reminderTime2}:00`);
-      if (!Number.isFinite(at.getTime()) || at <= now) continue;
-      const key = `${item.id}:${deadline.key}:${deadline.date}:${offset}`;
-      let id = 1;
-      for (const char of key) id = Math.imul(id, 31) + char.charCodeAt(0) & 2147483647;
-      while (!id || used.has(id)) id = id + 1 & 2147483647;
-      used.add(id);
-      events.push({ id, title: item.title, body: `${deadline.label} · ${offset ? `${offset} days until ${deadline.date}` : `Today · ${deadline.date}`}`, at, itemId: item.id });
-    }
-  }
-  return events.sort((a2, b) => a2.at.getTime() - b.at.getTime()).slice(0, 60);
-}
-const isNativeApp = () => Capacitor.isNativePlatform();
-const reminderTime = () => typeof localStorage === "undefined" ? "09:00" : localStorage.getItem("life-reminder-time") || "09:00";
-async function reminderPermission() {
-  return isNativeApp() ? (await LocalNotifications.checkPermissions()).display : "unsupported";
-}
-async function testDeviceReminder() {
-  if (await reminderPermission() !== "granted") throw new Error("Notifications are not enabled");
-  await LocalNotifications.schedule({ notifications: [{ id: 2147483646, title: "LIFE reminder test", sound: "default", body: "LIFE test notification. Delivery depends on sound, Focus and battery settings.", schedule: { at: new Date(Date.now() + 2e4) } }] });
-}
-let syncQueue = Promise.resolve();
-function syncDeviceReminders(items) {
-  syncQueue = syncQueue.catch(() => {
-  }).then(async () => {
-    if (!isNativeApp()) return;
-    const permission = await LocalNotifications.checkPermissions();
-    if (permission.display !== "granted") return;
-    const pending = await LocalNotifications.getPending();
-    if (pending.notifications.length) await LocalNotifications.cancel(pending);
-    if (Capacitor.getPlatform() === "android") await LocalNotifications.createChannel({ id: "life-deadlines", name: "Dates and return deadlines", importance: 4, visibility: 0, vibration: true });
-    const notifications = planDeviceReminders(items, /* @__PURE__ */ new Date(), reminderTime()).map(({ at, itemId, ...event }) => ({ ...event, sound: "default", channelId: "life-deadlines", schedule: { at }, extra: { itemId } }));
-    if (notifications.length) await LocalNotifications.schedule({ notifications });
-  });
-  return syncQueue;
-}
-async function enableDeviceReminders(items) {
-  const result = await LocalNotifications.requestPermissions();
-  if (result.display === "granted") await syncDeviceReminders(items);
-  return result.display;
 }
 const PhoneAlarm = registerPlugin("PhoneAlarm");
 function PhoneReminders() {
@@ -4886,7 +4903,7 @@ function MoreView({ navigate }) {
   ] });
 }
 const App = registerPlugin("App", {
-  web: () => import("./web-CiRwmVjX.js").then((m2) => new m2.AppWeb())
+  web: () => import("./web-B5_k5311.js").then((m2) => new m2.AppWeb())
 });
 function DeviceEvents() {
   const { items, ready } = useApp();

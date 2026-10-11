@@ -32,6 +32,8 @@ import { CatDot } from "./ui";
 import type { Route } from "./app-shell";
 import { isPurchase } from '../lib/purchase';
 import { PurchaseActions } from './purchase-flow';
+import { isNativeApp } from '../lib/device-reminders';
+import { shareAttachment } from '../lib/export-file';
 
 function Avatar({ item }: { item: Item }) {
   const color = CATEGORY_BY_ID[item.categoryId]?.color ?? "#8a8274";
@@ -60,6 +62,7 @@ export function ItemDetailView({
   const [renewDate, setRenewDate] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [attachments, setAttachments] = useState<Map<string, Blob>>(new Map());
+  const [fileMessage, setFileMessage] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const item = getItem(id);
@@ -331,6 +334,11 @@ export function ItemDetailView({
                       download={a.filename}
                       className="absolute inset-0 rounded-xl"
                       aria-label={`Open ${a.filename}`}
+                      onClick={event => {
+                        if (!isNativeApp() || !blob) return;
+                        event.preventDefault();
+                        void shareAttachment(a.filename, blob).catch(() => setFileMessage("Could not open the file share sheet. Try again."));
+                      }}
                     />
                   ) : null}
                   <button
@@ -347,6 +355,7 @@ export function ItemDetailView({
         )}
       </section>
 
+      {fileMessage && <p role="status" className="mt-3 text-sm text-clay">{fileMessage}</p>}
       {/* History */}
       <section className="card mt-4 p-5">
         <h2 className="mb-3 text-[0.85rem] font-extrabold text-ink">History</h2>

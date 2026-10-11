@@ -1,12 +1,12 @@
-import { W as WebPlugin } from "./app-D32JyOfQ.js";
-import "./server-Dl6Vov1L.js";
+import { W as WebPlugin } from "./app--K3sDNid.js";
+import "./server-WjngRWTI.js";
 import "node:async_hooks";
 import "node:stream";
 import "util";
 import "crypto";
 import "async_hooks";
 import "stream";
-import "./router-D0iB5776.js";
+import "./router-e4yhlYsQ.js";
 class AppWeb extends WebPlugin {
   constructor() {
     super();
