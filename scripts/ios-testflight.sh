@@ -1,5 +1,7 @@
 #!/bin/bash
 set -euo pipefail
+export LIFE_TESTFLIGHT_INTERNAL_ONLY="${LIFE_TESTFLIGHT_INTERNAL_ONLY:-true}"
+if [[ "$LIFE_TESTFLIGHT_INTERNAL_ONLY" != true && "$LIFE_TESTFLIGHT_INTERNAL_ONLY" != false ]]; then echo 'Invalid TestFlight distribution mode'; exit 1; fi
 xcodebuild -version
 sdk_version=$(xcrun --sdk iphoneos --show-sdk-version)
 if [ "${sdk_version%%.*}" -lt 26 ]; then echo 'TestFlight requires iOS SDK 26 or newer'; exit 1; fi
@@ -44,10 +46,10 @@ python3 - <<'PY'
 import os, plistlib, pathlib
 p=pathlib.Path(os.environ['LIFE_SIGNING_DIR'])/'ExportOptions.plist'
 with p.open('wb') as f:
-    plistlib.dump({'method':'app-store-connect','signingStyle':'manual','teamID':os.environ['LIFE_TEAM_ID'],'provisioningProfiles':{'com.st0orm801.life':os.environ['LIFE_PROFILE_NAME']},'testFlightInternalTestingOnly':True,'manageAppVersionAndBuildNumber':False},f)
+    plistlib.dump({'method':'app-store-connect','signingStyle':'manual','teamID':os.environ['LIFE_TEAM_ID'],'provisioningProfiles':{'com.st0orm801.life':os.environ['LIFE_PROFILE_NAME']},'testFlightInternalTestingOnly':os.environ['LIFE_TESTFLIGHT_INTERNAL_ONLY']=='true','manageAppVersionAndBuildNumber':False},f)
 PY
 xcodebuild -exportArchive -archivePath "$signing_dir/LIFE.xcarchive" -exportPath "$signing_dir/export" -exportOptionsPlist "$signing_dir/ExportOptions.plist"
 ipa_path=$(find "$signing_dir/export" -maxdepth 1 -name '*.ipa' -print -quit)
 if [ -z "$ipa_path" ]; then echo 'No signed IPA was produced'; exit 1; fi
 API_PRIVATE_KEYS_DIR="$signing_dir" xcrun altool --upload-app --type ios --file "$ipa_path" --apiKey "$LIFE_ASC_KEY_ID" --apiIssuer "$LIFE_ASC_ISSUER_ID"
-echo 'Uploaded for internal TestFlight processing. App Review was not submitted.'
+echo 'Uploaded for TestFlight processing. No App Review submission or public release was performed.'

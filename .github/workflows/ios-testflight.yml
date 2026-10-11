@@ -22,7 +22,7 @@ jobs:
         env:
           LIFE_BUILD_ID: ios-testflight-${{ github.run_number }}
       - run: npx cap sync ios
-      - name: Sign archive and upload for internal TestFlight only
+      - name: Sign archive and upload for authorized TestFlight testing
         env:
           LIFE_P12_BASE64: ${{ secrets.LIFE_P12_BASE64 }}
           LIFE_P12_PASSWORD: ${{ secrets.LIFE_P12_PASSWORD }}
@@ -32,4 +32,5 @@ jobs:
           LIFE_ASC_ISSUER_ID: ${{ secrets.LIFE_ASC_ISSUER_ID }}
           LIFE_TEAM_ID: GA8H8TTY36
           LIFE_BUILD_NUMBER: ${{ github.run_number }}
+          LIFE_TESTFLIGHT_INTERNAL_ONLY: 'false'
         run: bash scripts/ios-testflight.sh
