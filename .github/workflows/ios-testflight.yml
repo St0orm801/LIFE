@@ -31,5 +31,5 @@ jobs:
           LIFE_ASC_KEY_ID: ${{ secrets.LIFE_ASC_KEY_ID }}
           LIFE_ASC_ISSUER_ID: ${{ secrets.LIFE_ASC_ISSUER_ID }}
           LIFE_TEAM_ID: GA8H8TTY36
-          LIFE_BUILD_NUMBER: ${{ github.run_id }}
+          LIFE_BUILD_NUMBER: ${{ github.run_number }}
         run: bash scripts/ios-testflight.sh
