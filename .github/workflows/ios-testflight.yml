@@ -8,7 +8,7 @@ permissions:
 jobs:
   testflight:
     if: vars.LIFE_SIGNING_READY == 'true'
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 40
     environment: life-testflight
     steps:

@@ -1,5 +1,8 @@
 #!/bin/bash
 set -euo pipefail
+xcodebuild -version
+sdk_version=$(xcrun --sdk iphoneos --show-sdk-version)
+if [ "${sdk_version%%.*}" -lt 26 ]; then echo 'TestFlight requires iOS SDK 26 or newer'; exit 1; fi
 # Credentials exist only in the protected CI environment and temporary keychain.
 for name in LIFE_P12_BASE64 LIFE_P12_PASSWORD LIFE_PROFILE_BASE64 LIFE_ASC_KEY_BASE64 LIFE_ASC_KEY_ID LIFE_ASC_ISSUER_ID LIFE_TEAM_ID; do
   if [ -z "${!name:-}" ]; then echo "Missing required signing setting: $name"; exit 1; fi
