@@ -58,6 +58,7 @@ export function TodayView({ navigate }: { navigate: (r: Route) => void }) {
           {formatDateLong(today)}
         </h1>
       </header>
+      {ready && items.some(item => item.id.startsWith('demo-')) && <p className="mb-3 text-xs text-ink-2">Example records are included to show how LIFE works. They are not your purchases or documents. You can archive them from Items.</p>}
 
       {ready && items.some(item => item.status === 'active' && isPurchase(item) && purchaseStage(item) !== 'kept') && <section className="card p-4 mb-4 space-y-2" aria-labelledby="purchase-decisions"><h2 id="purchase-decisions" className="font-extrabold">Decisions & returns</h2>{items.filter(item => item.status === 'active' && isPurchase(item) && purchaseStage(item) !== 'kept').sort(overdueFirst).map(item => <button key={item.id} className="row-btn w-full" onClick={() => openItem(item.id)}><span className="font-bold">{item.title}</span><span className="block text-sm text-ink-2">{purchaseStageLabels[purchaseStage(item)]} · {item.nextDate}</span></button>)}</section>}
 

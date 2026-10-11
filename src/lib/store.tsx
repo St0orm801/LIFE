@@ -25,6 +25,7 @@ import type {
   Item,
 } from "./types";
 import { PRESET_BY_ID } from "./presets";
+import { encodeBackup, decodeBackup } from './backup-json';
 import { transitionPurchase, type PurchaseAction, purchaseStageLabels, purchaseStage } from './purchase';
 
 const SEED_FLAG = "demo-seeded-v1";
@@ -340,11 +341,11 @@ export function AppProvider({ children, repo = repository }: { children: ReactNo
 
   const exportAll = useCallback(async () => {
     const payload = await repoRef.current.exportAll();
-    return JSON.stringify(payload, null, 2);
+    return encodeBackup(payload);
   }, []);
 
   const importAll = useCallback(async (json: string) => {
-    const payload = JSON.parse(json) as Awaited<ReturnType<ItemRepository["exportAll"]>>;
+    const payload = decodeBackup(json);
     await repoRef.current.importAll(payload);
     const all = await repoRef.current.getAllItems();
     setItems(all);

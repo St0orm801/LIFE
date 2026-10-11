@@ -1,5 +1,5 @@
-import { K as reactExports, P as jsxRuntimeExports } from "./server-zDF_ccTR.js";
-import { p, n as nextMonthDay, a as addDays, t as todayStr, b as addYears, c as addMonths, d as diffDays, f as formatOffsetDays, m as monthDayOf, e as p$1, g as formatDateLong, h as formatRemainingDays, s as s$7, i as toDateStr, r as reminderOccurrence } from "./router-KgvdznhF.js";
+import { K as reactExports, P as jsxRuntimeExports } from "./server-BYXv4CDl.js";
+import { p, n as nextMonthDay, a as addDays, t as todayStr, b as addYears, c as addMonths, d as diffDays, f as formatOffsetDays, m as monthDayOf, e as p$1, g as formatDateLong, h as formatRemainingDays, s as s$7, i as toDateStr, r as reminderOccurrence } from "./router-D9emHzeH.js";
 const e$n = /* @__PURE__ */ new Map([
   [
     "bold",
@@ -1198,14 +1198,20 @@ class IndexedDbRepository {
     };
   }
   async importAll(payload) {
+    if (payload?.version !== 1 || !Array.isArray(payload.items) || !Array.isArray(payload.history) || !Array.isArray(payload.attachments)) throw new Error("Invalid backup");
+    const ids = /* @__PURE__ */ new Set();
+    for (const item of payload.items) {
+      if (!item || typeof item.id !== "string" || !item.id || ids.has(item.id) || typeof item.title !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(item.nextDate) || !["active", "archived", "completed"].includes(item.status) || !Array.isArray(item.attachments) || !Array.isArray(item.reminderRules)) throw new Error("Invalid backup item");
+      ids.add(item.id);
+    }
+    for (const event of payload.history) if (!event || typeof event.id !== "string" || !ids.has(event.itemId) || !Number.isFinite(event.date)) throw new Error("Invalid backup history");
+    for (const file of payload.attachments) if (!file || typeof file.id !== "string" || !(file.blob instanceof Blob) || file.blob.size > MAX_ATTACHMENT_BYTES) throw new Error("Invalid backup attachment");
     const db = await this.db();
-    await clearStore(db, "items");
-    await clearStore(db, "history");
-    await clearStore(db, "attachments");
-    await this.putItems(payload.items);
-    await this.putHistoryMany(payload.history);
-    const t2 = db.transaction("attachments", "readwrite");
-    payload.attachments.forEach((a2) => t2.objectStore("attachments").put(a2));
+    const t2 = db.transaction(["items", "history", "attachments"], "readwrite");
+    for (const name of ["items", "history", "attachments"]) t2.objectStore(name).clear();
+    payload.items.forEach((item) => t2.objectStore("items").put(item));
+    payload.history.forEach((event) => t2.objectStore("history").put(event));
+    payload.attachments.forEach((file) => t2.objectStore("attachments").put(file));
     await new Promise((resolve, reject) => {
       t2.oncomplete = () => resolve();
       t2.onerror = () => reject(t2.error);
@@ -1685,6 +1691,29 @@ const CATEGORY_BY_ID = Object.fromEntries(
 const MAJOR_CATEGORIES = CATEGORIES.filter((c2) => c2.major);
 CATEGORIES.filter((c2) => !c2.major);
 const POPULAR_PRESETS = PRESETS.filter((p2) => p2.popular);
+async function encodeBackup(payload) {
+  const attachments = await Promise.all(payload.attachments.map(async (file) => {
+    const bytes = new Uint8Array(await file.blob.arrayBuffer());
+    let binary = "";
+    for (let offset = 0; offset < bytes.length; offset += 8192) binary += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
+    return { id: file.id, mime: file.blob.type, base64: btoa(binary) };
+  }));
+  return JSON.stringify({ ...payload, version: 2, attachments }, null, 2);
+}
+function decodeBackup(json) {
+  const payload = JSON.parse(json);
+  if (payload.version === 1) {
+    if (payload.attachments?.length) throw new Error("Legacy backup cannot restore attachment bytes");
+    return payload;
+  }
+  if (payload.version !== 2 || !Array.isArray(payload.attachments)) throw new Error("Unsupported backup");
+  const attachments = payload.attachments.map((file) => {
+    if (typeof file.base64 !== "string" || file.base64.length > 35 * 1024 * 1024) throw new Error("Invalid attachment");
+    const binary = atob(file.base64);
+    return { id: file.id, blob: new Blob([Uint8Array.from(binary, (char) => char.charCodeAt(0))], { type: file.mime }) };
+  });
+  return { ...payload, version: 1, attachments };
+}
 const purchaseStageLabels = {
   decide: "Decide: keep or return",
   kept: "Keeping · warranty tracking",
@@ -2001,10 +2030,10 @@ function AppProvider({ children, repo = repository }) {
   }, []);
   const exportAll = reactExports.useCallback(async () => {
     const payload = await repoRef.current.exportAll();
-    return JSON.stringify(payload, null, 2);
+    return encodeBackup(payload);
   }, []);
   const importAll = reactExports.useCallback(async (json) => {
-    const payload = JSON.parse(json);
+    const payload = decodeBackup(json);
     await repoRef.current.importAll(payload);
     const all = await repoRef.current.getAllItems();
     setItems(all);
@@ -3115,6 +3144,7 @@ function TodayView({ navigate }) {
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[0.8rem] font-bold uppercase tracking-[0.16em] text-ink-3", children: greeting() }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-1 text-[1.7rem] font-extrabold tracking-tight text-ink", children: formatDateLong(today) })
     ] }),
+    ready && items.some((item) => item.id.startsWith("demo-")) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-3 text-xs text-ink-2", children: "Example records are included to show how LIFE works. They are not your purchases or documents. You can archive them from Items." }),
     ready && items.some((item) => item.status === "active" && isPurchase(item) && purchaseStage(item) !== "kept") && /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card p-4 mb-4 space-y-2", "aria-labelledby": "purchase-decisions", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { id: "purchase-decisions", className: "font-extrabold", children: "Decisions & returns" }),
       items.filter((item) => item.status === "active" && isPurchase(item) && purchaseStage(item) !== "kept").sort(overdueFirst).map((item) => /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "row-btn w-full", onClick: () => openItem(item.id), children: [
@@ -4414,11 +4444,11 @@ var Encoding;
   Encoding2["UTF16"] = "utf16";
 })(Encoding || (Encoding = {}));
 const Filesystem = registerPlugin("Filesystem", {
-  web: () => import("./web-oawimGjz.js").then((m2) => new m2.FilesystemWeb())
+  web: () => import("./web-CX2w7DUL.js").then((m2) => new m2.FilesystemWeb())
 });
 f();
 const Share = registerPlugin("Share", {
-  web: () => import("./web-Cuvfv3Lv.js").then((m2) => new m2.ShareWeb())
+  web: () => import("./web-CRK2yg5e.js").then((m2) => new m2.ShareWeb())
 });
 async function exportTextFile(filename, content, mime) {
   if (Capacitor.isNativePlatform()) {
@@ -4547,7 +4577,7 @@ var Weekday;
   Weekday2[Weekday2["Saturday"] = 7] = "Saturday";
 })(Weekday || (Weekday = {}));
 const LocalNotifications = registerPlugin("LocalNotifications", {
-  web: () => import("./web-D3knfC6c.js").then((m2) => new m2.LocalNotificationsWeb())
+  web: () => import("./web-Cw0bEdrU.js").then((m2) => new m2.LocalNotificationsWeb())
 });
 function planDeviceReminders(items, now = /* @__PURE__ */ new Date(), time = "09:00") {
   const reminderTime2 = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : "09:00";
@@ -4701,6 +4731,10 @@ function MoreView({ navigate }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "anim-fade-up", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("header", { className: "mb-5", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-[1.7rem] font-extrabold tracking-tight text-ink", children: "More" }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card p-5 flex flex-wrap gap-4 text-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { className: "underline text-teal-deep", href: "https://life.sevavtostrah.workers.dev/support.html", target: "_blank", rel: "noreferrer", children: "Help & support" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { className: "underline text-teal-deep", href: "https://life.sevavtostrah.workers.dev/privacy.html", target: "_blank", rel: "noreferrer", children: "Privacy policy" })
+      ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(PhoneReminders, {}),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "card p-5", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-start justify-between gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
@@ -4792,7 +4826,7 @@ function MoreView({ navigate }) {
   ] });
 }
 const App = registerPlugin("App", {
-  web: () => import("./web-BIkPlX1C.js").then((m2) => new m2.AppWeb())
+  web: () => import("./web-fIe0oiJT.js").then((m2) => new m2.AppWeb())
 });
 function DeviceEvents() {
   const { items, ready } = useApp();

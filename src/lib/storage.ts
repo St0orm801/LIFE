@@ -259,14 +259,20 @@ export class IndexedDbRepository implements ItemRepository {
   }
 
   async importAll(payload: BackupPayload): Promise<void> {
+    if (payload?.version !== 1 || !Array.isArray(payload.items) || !Array.isArray(payload.history) || !Array.isArray(payload.attachments)) throw new Error('Invalid backup');
+    const ids = new Set<string>();
+    for (const item of payload.items) {
+      if (!item || typeof item.id !== 'string' || !item.id || ids.has(item.id) || typeof item.title !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(item.nextDate) || !['active', 'archived', 'completed'].includes(item.status) || !Array.isArray(item.attachments) || !Array.isArray(item.reminderRules)) throw new Error('Invalid backup item');
+      ids.add(item.id);
+    }
+    for (const event of payload.history) if (!event || typeof event.id !== 'string' || !ids.has(event.itemId) || !Number.isFinite(event.date)) throw new Error('Invalid backup history');
+    for (const file of payload.attachments) if (!file || typeof file.id !== 'string' || !(file.blob instanceof Blob) || file.blob.size > MAX_ATTACHMENT_BYTES) throw new Error('Invalid backup attachment');
     const db = await this.db();
-    await clearStore(db, "items");
-    await clearStore(db, "history");
-    await clearStore(db, "attachments");
-    await this.putItems(payload.items);
-    await this.putHistoryMany(payload.history);
-    const t = db.transaction("attachments", "readwrite");
-    payload.attachments.forEach((a) => t.objectStore("attachments").put(a));
+    const t = db.transaction(['items', 'history', 'attachments'], 'readwrite');
+    for (const name of ['items', 'history', 'attachments']) t.objectStore(name).clear();
+    payload.items.forEach(item => t.objectStore('items').put(item));
+    payload.history.forEach(event => t.objectStore('history').put(event));
+    payload.attachments.forEach(file => t.objectStore('attachments').put(file));
     await new Promise<void>((resolve, reject) => {
       t.oncomplete = () => resolve();
       t.onerror = () => reject(t.error);

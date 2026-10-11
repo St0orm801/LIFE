@@ -75,6 +75,7 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
       </header>
 
       <div className="space-y-4">
+        <section className="card p-5 flex flex-wrap gap-4 text-sm"><a className="underline text-teal-deep" href="https://life.sevavtostrah.workers.dev/support.html" target="_blank" rel="noreferrer">Help & support</a><a className="underline text-teal-deep" href="https://life.sevavtostrah.workers.dev/privacy.html" target="_blank" rel="noreferrer">Privacy policy</a></section>
         <PhoneReminders />
         {/* Notifications */}
         <section className="card p-5">

@@ -6,6 +6,6 @@ export default defineConfig({
   root: "mobile",
   base: "./",
   plugins: [react(), tailwindcss()],
-  define: { __APP_BUILD_ID__: JSON.stringify(process.env.LIFE_BUILD_ID ?? "2026.10.10-mobile-001") },
+  define: { __APP_BUILD_ID__: JSON.stringify(process.env.LIFE_BUILD_ID ?? "2026.10.10-ios-beta-004") },
   build: { outDir: "../dist-mobile", emptyOutDir: true },
 });
