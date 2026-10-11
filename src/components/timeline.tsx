@@ -23,6 +23,7 @@ interface Group {
 
 function groupItems(items: Item[], today: string): Group[] {
   const groups: Group[] = [
+    { key: "overdue", label: "Overdue", items: [] },
     { key: "today", label: "Today", items: [] },
     { key: "tomorrow", label: "Tomorrow", items: [] },
     { key: "week", label: "This week", items: [] },
@@ -39,7 +40,7 @@ function groupItems(items: Item[], today: string): Group[] {
     if (it.status !== "active") continue;
     const diff = diffDays(today, it.nextDate);
     let key: string;
-    if (diff < 0) key = "today"; // overdue lands first as "Today"
+    if (diff < 0) key = "overdue";
     else if (diff === 0) key = "today";
     else if (diff === 1) key = "tomorrow";
     else if (diff <= 7) key = "week";
@@ -78,12 +79,21 @@ export function TimelineView({
   // Hooks must run unconditionally — computing counts before the calendar
   // branch keeps the hook order stable across mode switches (a conditional
   // hook after an early return crashes React with error #300).
-  const counts = useCategoryCounts(filtered);
+  const counts = useCategoryCounts(items);
+  const categoryFilters = (
+    <div className="no-scrollbar -mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1" aria-label="Categories">
+      <button className={`chip ${filter === "all" ? "chip-active" : ""}`} aria-pressed={filter === "all"} onClick={() => setFilter("all")}>All</button>
+      {CATEGORIES.filter((c) => c.major || counts.get(c.id)).map((c) => (
+        <button key={c.id} className={`chip ${filter === c.id ? "chip-active" : ""}`} aria-pressed={filter === c.id} onClick={() => setFilter(filter === c.id ? "all" : c.id)}>{c.shortName}</button>
+      ))}
+    </div>
+  );
 
   if (mode === "calendar") {
     return (
       <CalendarView
-        items={items}
+        items={filtered}
+        filters={categoryFilters}
         onOpenItem={(id) => navigate({ view: "item", id })}
         header={
           <ModeSwitch mode={mode} setMode={setMode} />
@@ -101,26 +111,7 @@ export function TimelineView({
         <ModeSwitch mode={mode} setMode={setMode} />
       </header>
 
-      {/* Category filter chips */}
-      <div className="no-scrollbar -mx-1 mb-5 flex gap-2 overflow-x-auto px-1 pb-1">
-        <button
-          className={`chip ${filter === "all" ? "chip-active" : ""}`}
-          aria-pressed={filter === "all"}
-          onClick={() => setFilter("all")}
-        >
-          All
-        </button>
-        {CATEGORIES.filter((c) => c.major || counts.get(c.id)).map((c) => (
-          <button
-            key={c.id}
-            className={`chip ${filter === c.id ? "chip-active" : ""}`}
-            aria-pressed={filter === c.id}
-            onClick={() => setFilter(filter === c.id ? "all" : c.id)}
-          >
-            {c.shortName}
-          </button>
-        ))}
-      </div>
+      {categoryFilters}
 
       {!ready ? (
         <p className="py-10 text-center text-sm text-ink-3">Loading your timeline…</p>

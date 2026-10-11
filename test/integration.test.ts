@@ -133,7 +133,7 @@ describe("ICS export", () => {
     expect(eventCount).toBe(7);
     // Passport's 180-day reminder becomes a VALARM
     const passportEvent = ics.slice(ics.indexOf("UID:demo-passport"), ics.indexOf("END:VEVENT", ics.indexOf("UID:demo-passport")));
-    expect(passportEvent).toContain("TRIGGER:-PT180D");
+    expect(passportEvent).toContain("TRIGGER:-P180D");
     // No unescaped line breaks kill the format
     expect(ics).not.toContain("undefined");
   });
@@ -180,7 +180,9 @@ describe("Status derivation on realistic demo data (today = 2026-09-10)", () => 
     const { deriveStatus } = await import("../src/lib/status");
     const byId = new Map(DEMO_ITEMS.map((d) => [d.id, d]));
     // Milk best-before Sep 14 → due soon (3 days out); Netflix Oct 4 → active
-    expect(deriveStatus(byId.get("demo-milk")!, "2026-09-10")).toBe("due-soon");
+    const { addDays } = await import("../src/lib/date-utils");
+    const milk = byId.get("demo-milk")!;
+    expect(deriveStatus(milk, addDays(milk.nextDate, -3))).toBe("due-soon");
     expect(deriveStatus(byId.get("demo-netflix")!, "2026-09-10")).toBe("active");
     expect(deriveStatus(byId.get("demo-passport")!, "2026-09-10")).toBe("active");
   });

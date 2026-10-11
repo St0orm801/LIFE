@@ -5,6 +5,9 @@
 import { formatOffsetDays, todayStr } from "./date-utils";
 import { reminderOffsets } from "./status";
 import type { Item } from "./types";
+import { CATEGORY_BY_ID } from "./presets";
+import { exportTextFile } from "./export-file";
+import { isPurchase, purchaseDeadlines } from './purchase';
 
 function icsDate(d: string): string {
   return d.replace(/-/g, "");
@@ -26,20 +29,22 @@ export function buildIcs(items: Item[]): string {
     "X-WR-CALNAME:LIFE CLOCK",
   ];
   const active = items.filter((i) => i.status === "active");
-  for (const item of active) {
-    const summary = `${item.title} (${labelFor(item.actionType)})`;
+  for (const item of active) for (const deadline of purchaseDeadlines(item)) {
+    const summary = `${item.title} (${isPurchase(item) ? deadline.label : labelFor(item.actionType)})`;
     lines.push("BEGIN:VEVENT");
-    lines.push(`UID:${item.id}@life-clock`);
-    lines.push(`DTSTART;VALUE=DATE:${icsDate(item.nextDate)}`);
-    lines.push(`DTEND;VALUE=DATE:${icsDate(addDay(item.nextDate))}`);
+    lines.push(`UID:${item.id}${isPurchase(item) ? `-${deadline.key}` : ''}@life-clock`);
+    lines.push(`DTSTAMP:${stamp}`);
+    lines.push(`DTSTART;VALUE=DATE:${icsDate(deadline.date)}`);
+    lines.push(`DTEND;VALUE=DATE:${icsDate(addDay(deadline.date))}`);
     lines.push(`SUMMARY:${escapeIcs(summary)}`);
+    lines.push(`CATEGORIES:${escapeIcs(CATEGORY_BY_ID[item.categoryId]?.name ?? item.categoryId)}`);
     if (item.notes) lines.push(`DESCRIPTION:${escapeIcs(item.notes)}`);
     for (const off of reminderOffsets(item.reminderRules)) {
       const trigger = reminderTrigger(item.nextDate, off);
       lines.push(`BEGIN:VALARM`);
       lines.push(`ACTION:DISPLAY`);
       lines.push(`DESCRIPTION:${escapeIcs(summary)}`);
-      lines.push(`TRIGGER:-PT${trigger}`);
+      lines.push(`TRIGGER:-P${trigger}`);
       lines.push(`END:VALARM`);
     }
     lines.push("END:VEVENT");
@@ -82,16 +87,8 @@ function addDay(d: string): string {
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 }
 
-export function downloadIcs(items: Item[]): void {
-  const blob = new Blob([buildIcs(items)], { type: "text/calendar;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `life-clock-${todayStr()}.ics`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+export function downloadIcs(items: Item[]): Promise<void> {
+  return exportTextFile(`life-clock-${todayStr()}.ics`, buildIcs(items), "text/calendar;charset=utf-8");
 }
 
 export { formatOffsetDays };

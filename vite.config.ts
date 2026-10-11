@@ -13,6 +13,7 @@ import { execSync } from "node:child_process";
 // Traceability: the same short build id appears in Settings on every
 // environment (Higgsfield preview + independent Cloudflare deployment).
 function buildId(): string {
+  if (process.env.LIFE_BUILD_ID) return process.env.LIFE_BUILD_ID;
   try {
     return execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
   } catch {

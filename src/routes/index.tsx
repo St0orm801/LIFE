@@ -44,14 +44,14 @@ export default function Landing() {
         {/* Hero */}
         <section className="pt-10 text-center md:pt-16">
           <p className="mx-auto max-w-md text-balance text-[1.05rem] font-bold uppercase tracking-[0.14em] text-teal-deep">
-            Everything important has a next date
+            Keep your deadlines. Finish the follow-up.
           </p>
           <h1 className="mx-auto mt-4 max-w-2xl text-balance text-[2.4rem] font-extrabold leading-[1.08] tracking-tight text-ink md:text-[3.4rem]">
-            Passports, warranties, renewals, birthdays. Remembered.
+            Don’t forget a return. Don’t lose the receipt.
           </h1>
           <p className="mx-auto mt-5 max-w-lg text-pretty text-[1.02rem] leading-relaxed text-ink-2">
-            Track expirations, renewals, maintenance and the dates that matter,
-            in one simple place. Name + date. Done.
+            Track purchases from “keep or return?” to “refund received”, with receipts,
+            return deadlines and warranties together. Your other important dates stay here too. Free, with no ads or subscription.
           </p>
           <div className="mt-8">
             <Link to="/app" className="btn btn-primary btn-lg">

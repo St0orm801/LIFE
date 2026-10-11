@@ -8,7 +8,7 @@ class ReminderCoordinator {
 }
 async function getServerEntry() {
   if (!serverEntryPromise) {
-    serverEntryPromise = import("./assets/server-DBxxkk3q.js").then((n) => n.a3).then(
+    serverEntryPromise = import("./assets/server-zDF_ccTR.js").then((n) => n.a0).then(
       (m) => m.default ?? m
     );
   }

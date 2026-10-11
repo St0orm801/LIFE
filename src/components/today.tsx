@@ -9,6 +9,7 @@ import type { Item } from "../lib/types";
 import { ItemRow } from "./item-row";
 import { EmptyState } from "./ui";
 import type { Route } from "./app-shell";
+import { isPurchase, purchaseStage, purchaseStageLabels } from '../lib/purchase';
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -58,8 +59,10 @@ export function TodayView({ navigate }: { navigate: (r: Route) => void }) {
         </h1>
       </header>
 
+      {ready && items.some(item => item.status === 'active' && isPurchase(item) && purchaseStage(item) !== 'kept') && <section className="card p-4 mb-4 space-y-2" aria-labelledby="purchase-decisions"><h2 id="purchase-decisions" className="font-extrabold">Decisions & returns</h2>{items.filter(item => item.status === 'active' && isPurchase(item) && purchaseStage(item) !== 'kept').sort(overdueFirst).map(item => <button key={item.id} className="row-btn w-full" onClick={() => openItem(item.id)}><span className="font-bold">{item.title}</span><span className="block text-sm text-ink-2">{purchaseStageLabels[purchaseStage(item)]} · {item.nextDate}</span></button>)}</section>}
+
       {!ready ? (
-        <Section title="Loading" subtle />
+        <div role="status" aria-label="Loading your dates" className="space-y-3"><p className="text-sm text-ink-2">Loading your dates…</p>{[0, 1, 2].map(key => <div key={key} className="card h-20 bg-surface-2" aria-hidden="true" />)}</div>
       ) : nothingNeeded ? (
         <div className="card">
           <EmptyState

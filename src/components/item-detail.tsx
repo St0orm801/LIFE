@@ -30,6 +30,8 @@ import type { HistoryEvent, Item } from "../lib/types";
 import { CATEGORY_BY_ID } from "../lib/presets";
 import { CatDot } from "./ui";
 import type { Route } from "./app-shell";
+import { isPurchase } from '../lib/purchase';
+import { PurchaseActions } from './purchase-flow';
 
 function Avatar({ item }: { item: Item }) {
   const color = CATEGORY_BY_ID[item.categoryId]?.color ?? "#8a8274";
@@ -129,6 +131,7 @@ export function ItemDetailView({
         Items
       </button>
 
+      {isPurchase(item) && <PurchaseActions item={item} onChanged={async () => setHistory((await historyFor(item.id)).sort((a, b) => b.date - a.date))} />}
       {/* Hero card */}
       <div className="card overflow-hidden">
         <div className="p-5 pb-2">
@@ -166,7 +169,7 @@ export function ItemDetailView({
           </div>
 
           {/* Lifecycle action */}
-          {item.status === "active" ? (
+          {item.status === "active" && !isPurchase(item) ? (
             <div className="mt-4">
               <button className="btn btn-primary btn-block btn-lg" onClick={onLifecycle}>
                 {actions?.action ?? verb?.action ?? "Done"}
@@ -197,19 +200,19 @@ export function ItemDetailView({
                 />
               ) : null}
             </div>
-          ) : (
+          ) : item.status === 'archived' ? (
             <div className="mt-4 flex gap-2">
               <button className="btn btn-secondary flex-1" onClick={() => void restoreItem(item.id)}>
                 Restore
               </button>
             </div>
-          )}
+          ) : null}
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <button className="btn btn-ghost btn-sm" onClick={() => setRenewOpen((v) => !v)}>
+            {!isPurchase(item) && <button className="btn btn-ghost btn-sm" onClick={() => setRenewOpen((v) => !v)}>
               <NotePencil size={15} />
               Edit date
-            </button>
+            </button>}
             <button className="btn btn-ghost btn-sm" onClick={() => void archiveItem(item.id)}>
               <Archive size={15} />
               {item.status === "archived" ? "Unarchive" : "Archive"}

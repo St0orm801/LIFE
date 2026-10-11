@@ -25,6 +25,7 @@ import type {
   Item,
 } from "./types";
 import { PRESET_BY_ID } from "./presets";
+import { transitionPurchase, type PurchaseAction, purchaseStageLabels, purchaseStage } from './purchase';
 
 const SEED_FLAG = "demo-seeded-v1";
 
@@ -50,6 +51,7 @@ export interface AppStoreValue {
   historyFor: (itemId: string) => Promise<HistoryEvent[]>;
   attachmentsFor: (itemId: string) => Map<string, Blob>;
   createItem: (input: NewItemInput) => Promise<Item>;
+  purchaseAction: (id: string, action: PurchaseAction, followUp?: string) => Promise<void>;
   updateItem: (id: string, patch: Partial<Item>) => Promise<void>;
   setNotes: (id: string, notes: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
@@ -93,6 +95,7 @@ function historyLabel(type: HistoryType): string {
 }
 
 export function formatHistoryEvent(ev: HistoryEvent): string {
+  if (ev.note) return ev.note;
   const base = historyLabel(ev.type);
   if (ev.oldDate && ev.newDate && ev.oldDate !== ev.newDate) {
     return `${base}: ${ev.oldDate} → ${ev.newDate}`;
@@ -211,6 +214,16 @@ export function AppProvider({ children, repo = repository }: { children: ReactNo
   const setNotes = useCallback(async (id: string, notes: string) => {
     await updateItem(id, { notes: notes.trim() || undefined });
   }, [updateItem]);
+
+  const purchaseAction = useCallback(async (id: string, action: PurchaseAction, followUp?: string) => {
+    const prev = await repoRef.current.getItem(id);
+    if (!prev) throw new Error('Item unavailable');
+    const patch = transitionPurchase(prev, action, followUp);
+    const next = { ...prev, ...patch, updatedAt: Date.now() };
+    await repoRef.current.putItem(next);
+    await repoRef.current.putHistory({ id: uid('h-'), itemId: id, type: action === 'refund' ? 'completed' : 'edited', date: Date.now(), oldDate: prev.nextDate, newDate: next.nextDate, note: purchaseStageLabels[purchaseStage(next)] });
+    setItems(list => list.map(item => item.id === id ? next : item));
+  }, []);
 
   const deleteItem = useCallback(async (id: string) => {
     await repoRef.current.deleteItem(id);
@@ -362,6 +375,7 @@ export function AppProvider({ children, repo = repository }: { children: ReactNo
         return m;
       },
       createItem,
+      purchaseAction,
       updateItem,
       setNotes,
       deleteItem,
@@ -376,7 +390,7 @@ export function AppProvider({ children, repo = repository }: { children: ReactNo
       importAll,
       wipeAll,
     }),
-    [ready, items, blobs, history, getItem, historyFor, createItem, updateItem, setNotes,
+    [ready, items, blobs, history, getItem, historyFor, createItem, purchaseAction, updateItem, setNotes,
      deleteItem, archiveItem, restoreItem, attachFiles, removeAttachment, lifecycle,
      loadBlob, seedDemo, exportAll, importAll, wipeAll],
   );

@@ -25,8 +25,9 @@ import { CATEGORIES, MAJOR_CATEGORIES, POPULAR_PRESETS, PRESET_BY_ID, CATEGORY_B
 import { searchPresets } from "../lib/search";
 import type { OptionalField, Preset } from "../lib/types";
 import { CatDot } from "./ui";
+import { PurchaseForm } from './purchase-flow';
 
-type Step = "home" | "category" | "form";
+type Step = "home" | "category" | "form" | "purchase";
 
 export function AddFlow({ onClose }: { onClose: () => void }) {
   const { ready, createItem, attachFiles } = useApp();
@@ -67,12 +68,12 @@ export function AddFlow({ onClose }: { onClose: () => void }) {
           <button
             className="flex h-10 w-10 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-surface-2"
             aria-label="Close"
-            onClick={() => (step === "home" ? onClose() : step === "category" ? setStep("home") : setStep("category"))}
+            onClick={() => (step === "home" ? onClose() : step === "category" || step === 'purchase' ? setStep("home") : setStep("category"))}
           >
             {step === "home" ? <X size={22} /> : <ArrowLeft size={22} />}
           </button>
           <h1 className="text-[1rem] font-extrabold tracking-tight text-ink">
-            {step === "home" ? "What do you want to track?" : step === "category" ? (CATEGORY_BY_ID[categoryId ?? ""]?.name ?? "Pick one") : (preset?.name ?? "Add item")}
+            {step === "home" ? "What do you want to track?" : step === 'purchase' ? 'Purchase' : step === "category" ? (CATEGORY_BY_ID[categoryId ?? ""]?.name ?? "Pick one") : (preset?.name ?? "Add item")}
           </h1>
           <div className="w-10" />
         </div>
@@ -96,7 +97,8 @@ export function AddFlow({ onClose }: { onClose: () => void }) {
       </header>
 
       <div className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-10 pt-4">
-        {step === "home" ? (
+        {step === 'home' && <button className="card mb-4 w-full p-4 text-left" onClick={() => setStep('purchase')}><span className="font-extrabold">Track a purchase →</span><span className="mt-1 block text-sm text-ink-2">Return deadline, receipt, warranty and refund follow-up.</span></button>}
+        {step === 'purchase' ? <PurchaseForm onSaved={() => void onSaved()} /> : step === "home" ? (
           query.trim().length >= 2 ? (
             <SearchResults results={results} onPick={pickPreset} onBackToBrowse={() => setQuery("")} />
           ) : (
@@ -305,6 +307,9 @@ function PresetForm({ preset, onSaved }: { preset: Preset; onSaved: () => Promis
   const [moreOpen, setMoreOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [barcode, setBarcode] = useState("");
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const needsTitle = !!preset.titleLabel;
@@ -314,13 +319,10 @@ function PresetForm({ preset, onSaved }: { preset: Preset; onSaved: () => Promis
   const canSave = (isFood ? title.trim().length > 0 && date : true) && date.length > 0;
 
   const save = async () => {
+    if (savingRef.current) return;
     if (!date) {
       setError("Pick a date first.");
       return;
-    }
-    if (date < today && !(preset.actionType === "birthday" || preset.actionType === "anniversary")) {
-      const ok = window.confirm("This date is in the past. Save it anyway?");
-      if (!ok) return;
     }
     const monthDay = preset.actionType === "birthday" || preset.actionType === "anniversary"
       ? monthDayOf(date)
@@ -348,6 +350,10 @@ function PresetForm({ preset, onSaved }: { preset: Preset; onSaved: () => Promis
 
     const meta = isFood && barcode.trim() ? { barcode: barcode.trim() } : undefined;
 
+    savingRef.current = true;
+    setSaving(true);
+    setError(null);
+    try {
     const created = await createItem({
       presetId: preset.id,
       title: needsTitle ? title || preset.name : title || preset.name,
@@ -363,13 +369,24 @@ function PresetForm({ preset, onSaved }: { preset: Preset; onSaved: () => Promis
       metadata: meta,
     });
     // Attach files picked before save (the item must exist first).
-    const pending = (window as unknown as { __lcPendingFiles?: File[] }).__lcPendingFiles;
+    const pending = pendingFiles;
     if (pending && pending.length > 0 && created) {
       const kind = pending.every((f) => f.type.startsWith("image/")) ? "photo" : "file";
-      await attachFiles(created.id, pending, kind);
-      (window as unknown as { __lcPendingFiles?: File[] }).__lcPendingFiles = undefined;
+      try {
+        await attachFiles(created.id, pending, kind);
+      } catch {
+        // The item is already saved: avoid a second creation on retry.
+        window.alert("Item saved, but the files could not be attached. Open the item to add them again.");
+      }
+      setPendingFiles([]);
     }
     await onSaved();
+    } catch {
+      setError("Could not save this item. Please try again.");
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
+    }
   };
 
   const canMore = preset.optionalFields.length > 0;
@@ -425,7 +442,7 @@ function PresetForm({ preset, onSaved }: { preset: Preset; onSaved: () => Promis
         />
         {preset.actionType === "birthday" || preset.actionType === "anniversary" ? (
           <p className="field-note">Year is optional — LIFE CLOCK remembers the month and day.</p>
-        ) : null}
+        ) : date && date < today ? <p className="field-note">This date has passed. The item will appear under Needs attention.</p> : null}
       </Field>
 
       {/* Reminder summary */}
@@ -496,7 +513,7 @@ function PresetForm({ preset, onSaved }: { preset: Preset; onSaved: () => Promis
                 const files = Array.from(e.target.files ?? []);
                 if (files.length) {
                   // Save happens first; the files attach after creation via item id — handled in onSaved by attach from the created item.
-                  (window as unknown as { __lcPendingFiles?: File[] }).__lcPendingFiles = files;
+                  setPendingFiles(files);
                   setError(null);
                 }
                 e.target.value = "";
@@ -509,10 +526,11 @@ function PresetForm({ preset, onSaved }: { preset: Preset; onSaved: () => Promis
       {error ? <p className="mt-3 text-[0.85rem] font-semibold text-clay">{error}</p> : null}
 
       {/* Save */}
+      {pendingFiles.length > 0 ? <p className="field-note">{pendingFiles.length} file(s) ready to attach when you save.</p> : null}
       <div className="sticky bottom-0 -mx-4 mt-6 border-t border-line bg-paper/95 px-4 py-3 backdrop-blur safe-bottom">
-        <button className="btn btn-primary btn-block btn-lg" type="submit" disabled={!canSave}>
+        <button className="btn btn-primary btn-block btn-lg" type="submit" disabled={!canSave || saving}>
           <Plus size={20} weight="bold" />
-          Save
+          {saving ? "Saving…" : "Save"}
         </button>
       </div>
     </form>
@@ -549,7 +567,7 @@ function ReminderEditor({
   const remove = (i: number) => onChange(values.filter((_, idx) => idx !== i));
   return (
     <div className="space-y-2">
-      {values.filter((v) => v.trim()).map((v, i) => (
+      {values.map((v, i) => (
         <div key={i} className="flex items-center gap-2">
           <input
             className="input flex-1"

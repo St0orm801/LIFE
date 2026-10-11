@@ -8,6 +8,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+dist-mobile/
+android/.gradle/
+android/local.properties
+android/**/build/
+ios/App/Pods/
+ios/**/xcuserdata/
 # dist is committed on purpose so `wrangler deploy` in Cloudflare Builds
 # (which has no separate build step in this project's config) finds the
 # entry-point immediately. Rebuild with `bun run build` after code changes.

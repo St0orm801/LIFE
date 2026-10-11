@@ -1,0 +1,27 @@
+name: LIFE iOS cloud build check
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/life-purchases]
+permissions:
+  contents: read
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --legacy-peer-deps
+      - run: npm run typecheck
+      - run: npm run mobile:build
+      - run: npx cap sync ios
+      - name: Compile iOS on macOS without signing
+        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build-ios CODE_SIGNING_ALLOWED=NO build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LIFE-iOS-simulator
+          path: build-ios/Build/Products/Debug-iphonesimulator/App.app
+          retention-days: 7

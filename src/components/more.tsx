@@ -20,6 +20,9 @@ import {
   requestPermission,
 } from "../lib/notify";
 import type { Route } from "./app-shell";
+import { enableDeviceReminders, isNativeApp } from "../lib/device-reminders";
+import { exportTextFile } from "../lib/export-file";
+import { PhoneReminders } from './phone-reminders';
 
 export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
   const { items, exportAll, importAll, wipeAll } = useApp();
@@ -29,17 +32,13 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const backup = async () => {
+    try {
     const json = await exportAll();
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `life-clock-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    setMsg("Backup downloaded.");
+    await exportTextFile(`life-clock-backup-${new Date().toISOString().slice(0, 10)}.json`, json, "application/json");
+    setMsg(isNativeApp() ? "Backup export opened. Choose where to save it." : "Backup downloaded.");
+    } catch {
+      setMsg("Backup export did not complete. You can try again.");
+    }
   };
 
   const restore = async (file: File) => {
@@ -53,6 +52,15 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
   };
 
   const enableNotifs = async () => {
+    if (isNativeApp()) {
+      try {
+        const state = await enableDeviceReminders(items);
+        setMsg(state === "granted" ? "Device reminders scheduled at your selected time: up to 60 upcoming reminders, refreshed when you open or update the app." : "Allow notifications in your phone settings to enable reminders.");
+      } catch {
+        setMsg("Could not schedule reminders. Try again or check your phone notification settings.");
+      }
+      return;
+    }
     const p = await requestPermission();
     setNotif(p);
     setMsg(p === "granted" ? "Reminders are on while this page is open." : "Notifications are blocked by your browser.");
@@ -67,6 +75,7 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
       </header>
 
       <div className="space-y-4">
+        <PhoneReminders />
         {/* Notifications */}
         <section className="card p-5">
           <div className="flex items-start justify-between gap-3">
@@ -78,15 +87,12 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
                 Reminders
               </h2>
               <p className="mt-1.5 text-[0.83rem] leading-relaxed text-ink-2">
-                LIFE CLOCK notifies you when items enter their reminder window
-                (e.g. passport 6 months before). Web notifications work while
-                this page is open; background push and email arrive with cloud
-                accounts in a later phase.
+                {isNativeApp() ? "Schedule reminders on this phone, including the due date, at your selected time. Delivery depends on your phone settings. The next 60 reminders are refreshed when you open or update the app." : "Keep track of reminder dates in the app and export them to your calendar. Browser notifications require this page to remain open; background push and email are not available."}
               </p>
             </div>
           </div>
           <div className="mt-3">
-            {nState === "granted" ? (
+            {!isNativeApp() && nState === "granted" ? (
               <p className="inline-flex items-center gap-1.5 text-[0.8rem] font-bold text-teal-deep">
                 <Bell size={14} weight="fill" /> Notifications enabled
               </p>
@@ -113,7 +119,7 @@ export function MoreView({ navigate }: { navigate: (r: Route) => void }) {
             it into Google Calendar, Outlook, or Apple Calendar. Automatic
             two-way sync is planned with cloud accounts.
           </p>
-          <button className="btn btn-secondary mt-3" onClick={() => downloadIcs(items)}>
+          <button className="btn btn-secondary mt-3" onClick={() => { void downloadIcs(items).catch(() => setMsg("Calendar export did not complete. You can try again.")); }}>
             <DownloadSimple size={16} />
             Download .ics
           </button>

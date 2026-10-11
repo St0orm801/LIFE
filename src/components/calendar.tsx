@@ -8,6 +8,7 @@ import { actionVerbLabel, deriveStatus } from "../lib/status";
 import { CATEGORY_BY_ID } from "../lib/presets";
 import type { Item } from "../lib/types";
 import { CatDot } from "./ui";
+import { isPurchase, purchaseDeadlines } from '../lib/purchase';
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -35,10 +36,12 @@ export function CalendarView({
   items,
   onOpenItem,
   header,
+  filters,
 }: {
   items: Item[];
   onOpenItem: (id: string) => void;
   header?: React.ReactNode;
+  filters?: React.ReactNode;
 }) {
   const today = todayStr();
   const [cursor, setCursor] = useState(() => new Date(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1, 1));
@@ -48,9 +51,11 @@ export function CalendarView({
     const m = new Map<string, Item[]>();
     for (const it of items) {
       if (it.status !== "active") continue;
-      const list = m.get(it.nextDate) ?? [];
-      list.push(it);
-      m.set(it.nextDate, list);
+      for (const deadline of purchaseDeadlines(it)) {
+        const list = m.get(deadline.date) ?? [];
+        list.push(isPurchase(it) ? { ...it, title: `${it.title} · ${deadline.label}`, nextDate: deadline.date } : it);
+        m.set(deadline.date, list);
+      }
     }
     return m;
   }, [items]);
@@ -70,6 +75,7 @@ export function CalendarView({
         {header}
       </div>
 
+      {filters}
       <div className="card-flat p-3">
         <div className="mb-2 flex items-center justify-between">
           <button
@@ -104,6 +110,8 @@ export function CalendarView({
                 key={cell.date}
                 onClick={() => setSelected(isSelected ? null : cell.date)}
                 aria-label={`${cell.date}${dateItems ? `, ${dateItems.length} items` : ""}`}
+                aria-pressed={isSelected}
+                aria-current={isToday ? "date" : undefined}
                 className={`relative flex aspect-square flex-col items-center justify-center rounded-xl text-[0.84rem] font-semibold transition-colors ${
                   !cell.inMonth ? "text-ink-3/50" : isSelected ? "bg-teal text-white" : isToday ? "bg-teal-tint text-teal-deep" : "text-ink hover:bg-surface-2"
                 }`}
